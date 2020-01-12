@@ -1,8 +1,8 @@
-# shell
+# Cbrsh Shell
 COP4610 Project 1: Implementing a Shell
 
 ## How to compile with makefile
-- Use command make to build shell program *"cbrsh"*
+- Use command *"make"* to build shell program *"cbrsh"*
 
 ### Contents of Tar and Files
 ##### README
@@ -19,12 +19,10 @@ COP4610 Project 1: Implementing a Shell
 ##### cbrsh.c
 - Is the c shell program driver
 
-#### Group Members
+### Group Members
 - Garett Anderson
 - Daniel Brown
-
 ##### Garett Division of Labor
 - makefile
 - readme (title, group members, this)
-
 ##### Daniel Division of Labor
