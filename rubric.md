@@ -31,8 +31,8 @@ However, a program that cannot compile cannot get more than 30 points.
 - Readability (indentation, white space, max column-width < 100 chars) 3 pts
 - Submission does not contain unnecessary print statements 4 pts
 
-*If the project solution does not use the Makefile mechanism or compile as specified in the README,
-70 points will be deduced from the total project grade.* It is the student's responsibility to make sure that
+**If the project solution does not use the Makefile mechanism or compile as specified in the README,
+70 points will be deduced from the total project grade.** It is the student's responsibility to make sure that
 the solution archive will un-tar correctly. Please test your instructions in the README file as if you are
 the grader prior to submitting them. For projects 1 and 3, grading will be completed on linprog. It is
 recommended that you develop these projects on linprog as it is your responsibility to ensure your
