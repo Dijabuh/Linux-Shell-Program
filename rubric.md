@@ -2,13 +2,13 @@
 
 Students will complete the class projects in teams of 2 to 3. If you have a reason why you would like to
 work alone, you need to talk to a TA to get it approved. For projects requiring use of a lab computer, a
-machine will be assigned to each team. Each project submission should consist of a README, a
-Makefile, and the project source code (binaries and executables should be removed) tar’ed into a single
-file. Tar files are to be submitted electronically via Canvas. Each team is to submit only one copy of the
+machine will be assigned to each team. Each project submission should consist of a **README**, a
+**Makefile**, and the project **source code** (*binaries and executables should be removed*) **tar’ed** into a single
+file. Tar files are to be submitted electronically **via Canvas**. Each team is to submit only one copy of the
 project with the name
 
-project<n>_lastname1_lastname2_lastname3.tar
-where n corresponds to the nth project.
+**project<n>_lastname1_lastname2_lastname3.tar**
+*where n corresponds to the nth project.*
 
 ## Project Grading Policy
 
@@ -31,8 +31,8 @@ However, a program that cannot compile cannot get more than 30 points.
 - Readability (indentation, white space, max column-width < 100 chars) 3 pts
 - Submission does not contain unnecessary print statements 4 pts
 
-If the project solution does not use the Makefile mechanism or compile as specified in the README,
-70 points will be deduced from the total project grade. It is the student's responsibility to make sure that
+*If the project solution does not use the Makefile mechanism or compile as specified in the README,
+70 points will be deduced from the total project grade.* It is the student's responsibility to make sure that
 the solution archive will un-tar correctly. Please test your instructions in the README file as if you are
 the grader prior to submitting them. For projects 1 and 3, grading will be completed on linprog. It is
 recommended that you develop these projects on linprog as it is your responsibility to ensure your
