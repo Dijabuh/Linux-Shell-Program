@@ -5,7 +5,7 @@
 
 int main(){
 
-	printf("cbrsh! \n");
+	printf("shell \n");
 
 	return 0;
 }
