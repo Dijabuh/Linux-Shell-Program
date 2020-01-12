@@ -1,8 +1,11 @@
-cbrsh: cbrsh.o
-	gcc cbrsh.o -o cbrsh -std=c99
+CC = gcc
+TARGET = cbrsh
 
-cbrsh.o: cbrsh.c
-	gcc -c cbrsh.c
+$(TARGET): $(TARGET).o
+	$(CC) $< -o $@ -std=c99
+
+$(TARGET).o: $(TARGET).c
+	$(CC) -c $< -o $@
 
 clean:
-	rm -rf *.o
+	rm -rf *.o *~ $(TARGET)
