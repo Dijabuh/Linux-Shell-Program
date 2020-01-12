@@ -1,5 +1,5 @@
 CC = gcc
-TARGET = cbrsh
+TARGET = shell
 
 $(TARGET): $(TARGET).o
 	$(CC) $< -o $@ -std=c99
