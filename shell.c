@@ -2,6 +2,7 @@
 // Garett Anderson, Daniel Brown
 
 #include <stdlib.h>
+#include <stdio.h>
 
 int main(){
 
