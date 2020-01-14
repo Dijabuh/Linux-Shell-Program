@@ -1,7 +1,7 @@
 // COP 4610 Project 1: Implementating a Shell
 // Garett Anderson, Daniel Brown
 
-#include <stdio.h>
+#include <stdlib.h>
 
 int main(){
 
