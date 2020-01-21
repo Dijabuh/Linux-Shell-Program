@@ -14,3 +14,4 @@ For shortcut resoltuion:
 
 Needs:
 	function to split up string into array of strings based on certain char
+	function to check if an input is a path(ie, it has a / in it)

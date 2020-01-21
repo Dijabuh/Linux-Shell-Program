@@ -2,6 +2,7 @@
 // Garett Anderson, Daniel Brown
 
 #include "parser.h"
+#include "file_res.h"
 #include <stdlib.h>
 #include <stdio.h>
 
