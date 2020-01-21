@@ -10,8 +10,13 @@ int main(){
 	instr.tokens = NULL;
 	instr.numTokens = 0;
 
+
+
 	while (1) {
-		printf("Temp prompt> ");
+		char* user = getenv("USER");
+		char* machine = getenv("MACHINE");
+		char* pwd = getenv("PWD");
+		printf("%s@%s : %s > ", user, machine, pwd);
 
 		getTokens(&instr);
 		//do something with the instruction here	
