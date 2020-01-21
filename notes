@@ -1,0 +1,16 @@
+For shortcut resoltuion:
+	1: check 1st char:
+		if ~ or $HOME, abs_pathname starts at $HOME
+		if /, abs_pathname starts at /
+		else, abs_pathname starts at pwd
+	2: split up rest of pathname into an array of strings seperated by /
+	3: recursivley do this step for all values in array
+		a: if not .. or .
+			add it to abs_pathname
+		b: if .
+			ignore it and move on to next value
+		c: if ..
+			remove chars from end of abs_pathname until we reach a /
+
+Needs:
+	function to split up string into array of strings based on certain char
