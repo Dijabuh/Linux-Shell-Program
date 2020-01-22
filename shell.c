@@ -21,6 +21,7 @@ int main(){
 
 		getTokens(&instr);
 		//do something with the instruction here	
+		printf("%s\n", getAbsPathname(instr.tokens[0]));
 		clearInstruction(&instr);
 	}
 

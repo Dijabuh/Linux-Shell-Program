@@ -43,10 +43,11 @@ void splitString(pathparts* ret, char* str, char c) {
 	//then add temp to ret
 	for(int i = 0; i < len; i++) {
 		if (str[i] == c && i > pos) {
+			temp = (char*) malloc((i-pos + 1) * sizeof(char));
 			strcpy(temp, substr(str, pos, i));
 			
 			//now add temp to ret
-			ret->parts = (char**) realloc(ret, (ret->numParts + 1) * sizeof(char));
+			ret->parts = (char**) realloc(ret->parts, (ret->numParts + 1) * sizeof(char));
 
 			(ret->parts)[ret->numParts] = (char*) malloc((strlen(temp) + 1) * sizeof(char));
 
@@ -69,7 +70,6 @@ char* getAbsPathname(char* str) {
 	char* absPath = NULL;
 	pathparts split;
 	int pos = 0;
-
 	//first check first char of str
 	if (str[0] == '/') {
 		//then we are dealing with an absolute pathname
@@ -79,16 +79,16 @@ char* getAbsPathname(char* str) {
 	}
 	else if (str[0] == '~' || (len > 4 && strcmp("$HOME", substr(str, 0, 5)) == 0)) {
 		//then we start at $HOME
-		absLen = strlen(getenv("$HOME"));
+		absLen = strlen(getenv("HOME"));
 		absPath = (char*) malloc((absLen + 1) * sizeof(char));
-		strcpy(absPath, getenv("$HOME"));
+		strcpy(absPath, getenv("HOME"));
 		pos = 1;
 	}
 	else {
 		//we start at pwd
-		absLen = strlen(getenv("$PWD"));
+		absLen = strlen(getenv("PWD"));
 		absPath = (char*) malloc((absLen + 1) * sizeof(char));
-		strcpy(absPath, getenv("$PWD"));
+		strcpy(absPath, getenv("PWD"));
 	}
 
 	//get split string
