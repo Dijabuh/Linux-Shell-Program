@@ -27,3 +27,6 @@ COP4610 Project 1: Implementing a Shell
 - gitignore
 - readme (title, group members, this)
 ##### Daniel Division of Labor
+- Parsing
+- Resolving Path Shortcuts
+- User Prompt
