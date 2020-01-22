@@ -30,37 +30,30 @@ char* substr(char* str, int start, int end) {
 
 //Splits up a string into an array of strings seperated by a given char
 void splitString(pathparts* ret, char* str, char c) {
-	int len = strlen(str);
-	int pos = 0;
 	char* temp = NULL;
 
 	//initialize the return array
 	ret->parts = (char**) malloc(sizeof(char*));
 	ret->numParts = 0;
 
-	//loop through str
-	//when we encounter c, put everything from the beggining of str up to c in temp
-	//then add temp to ret
-	for(int i = 0; i < len; i++) {
-		if (str[i] == c && i > pos) {
-			temp = (char*) malloc((i-pos + 1) * sizeof(char));
-			strcpy(temp, substr(str, pos, i));
-			
-			//now add temp to ret
-			ret->parts = (char**) realloc(ret->parts, (ret->numParts + 1) * sizeof(char));
+	temp = strtok(str, "/");
+	ret->parts = (char**) realloc(ret->parts, (ret->numParts + 1) * sizeof(char*));
+	(ret->parts)[ret->numParts] = (char*) malloc((strlen(temp) + 1) * sizeof(char));
+	strcpy((ret->parts)[ret->numParts], temp);
+	(ret->numParts)++;
 
+	//keep looping until we've gone through every part of the path
+	while(temp != NULL) {
+		temp = strtok(NULL, "/");
+		if (temp != NULL) {
+			ret->parts = (char**) realloc(ret->parts, (ret->numParts + 1) * sizeof(char*));
 			(ret->parts)[ret->numParts] = (char*) malloc((strlen(temp) + 1) * sizeof(char));
-
 			strcpy((ret->parts)[ret->numParts], temp);
-
 			(ret->numParts)++;
-
-			pos = i+1;
-		}
-		else if (str[i] == c) {
-			pos = i+1;
 		}
 	}
+
+	free(temp);
 }
 
 //Returns the absolute pathname of a given path
@@ -70,6 +63,7 @@ char* getAbsPathname(char* str) {
 	char* absPath = NULL;
 	pathparts split;
 	int pos = 0;
+	
 	//first check first char of str
 	if (str[0] == '/') {
 		//then we are dealing with an absolute pathname
@@ -107,18 +101,33 @@ char* getAbsPathname(char* str) {
 		else if (strcmp(curPart, "..") == 0) {
 			//in this case, we remove one part from our absolute path name
 			//if we are at root, do nothing
-			absLen = strrchr(absPath, '/') - str;
-			absPath = (char*) realloc(absPath, (absLen) * sizeof(char));
+			absLen = strrchr(absPath, '/') - absPath;
+			if (absLen == 0) {
+				absLen = 1;
+			}
+			absPath = (char*) realloc(absPath, (absLen + 1) * sizeof(char));
+			//add null character
+			absPath[absLen] = '\0';
 		}
 		else {
 			//otherwise, add the current part to the absolute pathname
-			absLen += newlen;
-			absPath = (char*) realloc(absPath, (absLen + 2) * sizeof(char));
-			strcat(absPath, "/");
-			strcat(absPath, curPart);
+			if (absLen == 1) {
+				//in this case, we are at root
+				absLen += newlen;
+				absPath = (char*) realloc(absPath, (absLen + 1) * sizeof(char));
+				strcat(absPath, curPart);
+			}
+			else {
+				absLen += newlen + 1;
+				absPath = (char*) realloc(absPath, (absLen + 1) * sizeof(char));
+				strcat(absPath, "/");
+				strcat(absPath, curPart);
+			}
 		}
 
 	}
+
+	free((split.parts));
 
 	return absPath;
 }
