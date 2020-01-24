@@ -65,6 +65,14 @@ char* getAbsPathname(char* str) {
 	pathparts split;
 	int pos = 0;
 	
+	//Check if the path is simply /
+	//Stops segfaults
+	if(strlen(str) == 1 && str[0] == '/') {
+		absPath = (char*) malloc((2) * sizeof(char));
+		strcpy(absPath, "/");
+		return absPath;
+	}
+
 	//first check first char of str
 	if (str[0] == '/') {
 		//then we are dealing with an absolute pathname

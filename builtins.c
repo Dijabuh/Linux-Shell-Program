@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #include "builtins.h"
+#include "file_res.h"
 
 void EXIT(int commands){
 
@@ -23,17 +24,18 @@ int cd(char* path) {
 		return 0;
 	}
 	else {
+		char* newpath = getAbsPathname(path);
 		//otherwise, check if directory exists, and if it does, change to it
-			DIR* dir = opendir(path);
-			if(dir != NULL) {
-				//directory exists
-				chdir(path);
-				setenv("PWD", path, 1);
-			}
-			else {
-				//failed for some reason
-				printf("Could not change directory: %d\n", errno);
-				return -1;
-			}
+		DIR* dir = opendir(newpath);
+		if(dir != NULL) {
+			//directory exists
+			chdir(newpath);
+			setenv("PWD", newpath, 1);
+		}
+		else {
+			//failed for some reason
+			printf("Could not change directory: %d\n", errno);
+			return -1;
+		}
 	}
 }
