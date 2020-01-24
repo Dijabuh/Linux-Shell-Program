@@ -9,7 +9,7 @@
 
 void EXIT(int commands){
 
-	printf("Exiting now! Executed %d commands!", commands);
+	printf("Exiting now! Executed %d commands!\n", commands);
 
 	exit(EXIT_SUCCESS);
 }
