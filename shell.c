@@ -4,10 +4,10 @@
 #include "parser.h"
 #include "file_res.h"
 #include "builtins.h"
+#include "execution.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 
 int main(){
 	instruction instr;
@@ -58,6 +58,8 @@ int main(){
 			char* cmdpath = getPath(instr.tokens[0]);
 			if (cmdpath != NULL) {
 				printf("Full path: %s\n", cmdpath);
+				strcpy(instr.tokens[0], cmdpath);
+				execute(instr.tokens);	
 			}
 			else {
 				printf("Command not found\n");
