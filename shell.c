@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 int main(){
 	int numInstructionsRun = 0;
@@ -47,18 +48,29 @@ int main(){
 		else if (strcmp(command, "echo") == 0) {
 			numInstructionsRun++;
 		}
-
-		else if(isPath(instr.tokens[0])){
+		
+		//Check if first token, ie the command is a path
+		//if it is, resolve the pathname, check if it exists, if it does run it
+		//need to switch from using instr.tokens[0] to a char*
+		//instr.tokens[0] could be an &
+		else if(isPath(command)){
 			printf("Is a path\n");
-			char* path = getAbsPathname(instr.tokens[0]);
+			char* path = getAbsPathname(command);
 			printf("%s\n", path);
-			free(path);
+			if(access(path, F_OK) == 0) {
+				printf("Full path: %s\n", path);
+				instr.tokens[0] = realloc(instr.tokens[0], ((strlen(path) + 1) * sizeof(char)));
+				strcpy(instr.tokens[0], path);
+				execute(instr.tokens);	
+				numInstructionsRun++;
+			}
 		}
 		else {
 			printf("Is a command\n");
-			char* cmdpath = getPath(instr.tokens[0]);
+			char* cmdpath = getPath(command);
 			if (cmdpath != NULL) {
 				printf("Full path: %s\n", cmdpath);
+				instr.tokens[0] = realloc(instr.tokens[0], ((strlen(cmdpath) + 1) * sizeof(char)));
 				strcpy(instr.tokens[0], cmdpath);
 				execute(instr.tokens);	
 				numInstructionsRun++;
@@ -66,9 +78,7 @@ int main(){
 			else {
 				printf("Command not found\n");
 			}
-			free(cmdpath);
 		}
-
 		clearInstruction(&instr);
 	}
 

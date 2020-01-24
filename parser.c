@@ -91,8 +91,9 @@ void addNull(instruction* instr_ptr)
 void clearInstruction(instruction* instr_ptr)
 {
 	int i;
-	for (i = 0; i < instr_ptr->numTokens; i++)
+	for (i = 0; i < instr_ptr->numTokens; i++) {
 		free(instr_ptr->tokens[i]);
+	}
 
 	free(instr_ptr->tokens);
 
