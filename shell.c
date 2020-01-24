@@ -59,8 +59,10 @@ int main(){
 			printf("%s\n", path);
 			if(access(path, F_OK) == 0) {
 				printf("Full path: %s\n", path);
-				instr.tokens[0] = realloc(instr.tokens[0], ((strlen(path) + 1) * sizeof(char)));
-				strcpy(instr.tokens[0], path);
+				//instr.tokens[0] = realloc(instr.tokens[0], ((strlen(path) + 1) * sizeof(char)));
+				//strcpy(instr.tokens[0], path);
+				free(instr.tokens[0]);
+				instr.tokens[0] = path;
 				execute(instr.tokens);	
 				numInstructionsRun++;
 			}
@@ -70,8 +72,10 @@ int main(){
 			char* cmdpath = getPath(command);
 			if (cmdpath != NULL) {
 				printf("Full path: %s\n", cmdpath);
-				instr.tokens[0] = realloc(instr.tokens[0], ((strlen(cmdpath) + 1) * sizeof(char)));
-				strcpy(instr.tokens[0], cmdpath);
+				//instr.tokens[0] = realloc(instr.tokens[0], ((strlen(cmdpath) + 1) * sizeof(char)));
+				//strcpy(instr.tokens[0], cmdpath);
+				free(instr.tokens[0]);
+				instr.tokens[0] = cmdpath;
 				execute(instr.tokens);	
 				numInstructionsRun++;
 			}
