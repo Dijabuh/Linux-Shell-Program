@@ -73,6 +73,11 @@ char* getAbsPathname(char* str) {
 		return absPath;
 	}
 
+	char* sub = NULL;
+	if(len>4) {
+		sub = substr(str, 0, 5);
+	}
+
 	//first check first char of str
 	if (str[0] == '/') {
 		//then we are dealing with an absolute pathname
@@ -80,7 +85,14 @@ char* getAbsPathname(char* str) {
 		absPath = (char*) malloc((absLen + 1) * sizeof(char));
 		strcpy(absPath, "/");
 	}
-	else if (str[0] == '~' || (len > 4 && strcmp("$HOME", substr(str, 0, 5)) == 0)) {
+	else if (str[0] == '~') {
+		//then we start at $HOME
+		absLen = strlen(getenv("HOME"));
+		absPath = (char*) malloc((absLen + 1) * sizeof(char));
+		strcpy(absPath, getenv("HOME"));
+		pos = 1;
+	}
+	else if (strcmp("$HOME", str) == 0) {
 		//then we start at $HOME
 		absLen = strlen(getenv("HOME"));
 		absPath = (char*) malloc((absLen + 1) * sizeof(char));
@@ -93,6 +105,8 @@ char* getAbsPathname(char* str) {
 		absPath = (char*) malloc((absLen + 1) * sizeof(char));
 		strcpy(absPath, getenv("PWD"));
 	}
+
+	free(sub);
 
 	//get split string
 	splitString(&split, str, "/");
@@ -133,9 +147,12 @@ char* getAbsPathname(char* str) {
 				strcat(absPath, curPart);
 			}
 		}
-
+		free(curPart);
 	}
 
+	for(int i = 0; i < split.numParts; i++) {
+		free(split.parts[i]);
+	}
 	free((split.parts));
 
 	return absPath;
@@ -168,10 +185,21 @@ char* getPath(char* cmd) {
 
 		//check if it exists
 		if(access(curPath, F_OK) == 0) {
+			free(pathVar);
+			for(int i = 0; i < pathList.numParts; i++) {
+				free(pathList.parts[i]);
+			}
+			free((pathList.parts));
 			return curPath;
 		}
+		free(curPath);
 	}
 
+	for(int i = 0; i < pathList.numParts; i++) {
+		free(pathList.parts[i]);
+	}
+	free((pathList.parts));
+	free(pathVar);
 	return NULL;
 }
 
