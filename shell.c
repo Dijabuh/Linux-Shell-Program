@@ -10,11 +10,10 @@
 #include <string.h>
 
 int main(){
+	int numInstructionsRun = 0;
 	instruction instr;
 	instr.tokens = NULL;
 	instr.numTokens = 0;
-
-
 
 	while (1) {
 		char* user = getenv("USER");
@@ -27,24 +26,26 @@ int main(){
 		char* command = instr.tokens[0];
 		//check if command is one of the builtins
 		if(strcmp(command, "exit") == 0) {
-			EXIT(0);
+			EXIT(numInstructionsRun);
 		}
 		else if (strcmp(command, "cd") == 0) {
 			if(instr.numTokens == 3) {
 				cd(instr.tokens[1]);
+				numInstructionsRun++;
 			}
 			else if(instr.numTokens == 2) {
 				cd(NULL);
+				numInstructionsRun++;
 			}
 			else {
 				printf("Too many arguements for cd\n");
 			}
 		}
 		else if (strcmp(command, "jobs") == 0) {
-
+			numInstructionsRun++;
 		}
 		else if (strcmp(command, "echo") == 0) {
-
+			numInstructionsRun++;
 		}
 
 		else if(isPath(instr.tokens[0])){
@@ -60,6 +61,7 @@ int main(){
 				printf("Full path: %s\n", cmdpath);
 				strcpy(instr.tokens[0], cmdpath);
 				execute(instr.tokens);	
+				numInstructionsRun++;
 			}
 			else {
 				printf("Command not found\n");
