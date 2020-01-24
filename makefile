@@ -2,7 +2,7 @@ CC = gcc
 TARGET = shell
 STND = -std=c99
 
-$(TARGET): $(TARGET).o parser.o file_res.o redirection.o
+$(TARGET): $(TARGET).o parser.o file_res.o execution.o
 	$(CC) $^ -o $@ $(STND)
 
 $(TARGET).o: $(TARGET).c
@@ -14,8 +14,8 @@ parser.o: parser.c
 file_res.o: file_res.c
 	$(CC) -c file_res.c -o file_res.o $(STND)
 
-redirection.o: redirection.c
-	$(CC) -c redirection.c -o redirection.o $(STND)
+execution.o: execution.c
+	$(CC) -c execution.c -o execution.o $(STND)
 
 clean:
 	rm -rf *.o *~ $(TARGET)
