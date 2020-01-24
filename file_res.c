@@ -30,14 +30,14 @@ char* substr(char* str, int start, int end) {
 }
 
 //Splits up a string into an array of strings seperated by a given char
-void splitString(pathparts* ret, char* str, char c) {
+void splitString(pathparts* ret, char* str, char* c) {
 	char* temp = NULL;
 
 	//initialize the return array
 	ret->parts = (char**) malloc(sizeof(char*));
 	ret->numParts = 0;
 
-	temp = strtok(str, "/");
+	temp = strtok(str, c);
 	ret->parts = (char**) realloc(ret->parts, (ret->numParts + 1) * sizeof(char*));
 	(ret->parts)[ret->numParts] = (char*) malloc((strlen(temp) + 1) * sizeof(char));
 	strcpy((ret->parts)[ret->numParts], temp);
@@ -45,7 +45,7 @@ void splitString(pathparts* ret, char* str, char c) {
 
 	//keep looping until we've gone through every part of the path
 	while(temp != NULL) {
-		temp = strtok(NULL, "/");
+		temp = strtok(NULL, c);
 		if (temp != NULL) {
 			ret->parts = (char**) realloc(ret->parts, (ret->numParts + 1) * sizeof(char*));
 			(ret->parts)[ret->numParts] = (char*) malloc((strlen(temp) + 1) * sizeof(char));
@@ -87,7 +87,7 @@ char* getAbsPathname(char* str) {
 	}
 
 	//get split string
-	splitString(&split, str, '/');
+	splitString(&split, str, "/");
 
 	//check each part of the path and add it on to the abs pathname
 	for(int i = pos; i < split.numParts; i++) {
@@ -144,18 +144,20 @@ char* getPath(char* cmd) {
 
 	//Split the $PATH variable up into a list of pathnames seperated by :
 	pathparts pathList;
-	splitString(&pathList, pathVar, ':');
+	splitString(&pathList, pathVar, ":");
 
 	//loop through all paths in list
 	//add cmd onto them
 	//if the file exists, return it
 	for(int i = 0; i < pathList.numParts; i++) {
 		int pathLen = strlen(pathList.parts[i]);
-		char* curPath = (char*) malloc((pathLen + cmdLen + 1) * sizeof(char));
+		char* curPath = (char*) malloc((pathLen + cmdLen + 2) * sizeof(char));
 		
 		//get current path and add cmd onto it
 		strcpy(curPath, pathList.parts[i]);
+		strcat(curPath, "/");
 		strcat(curPath, cmd);
+		printf("%s\n", curPath);
 
 		//check if it exists
 		if(access(curPath, F_OK) == 0) {
