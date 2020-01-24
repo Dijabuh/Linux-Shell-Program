@@ -26,6 +26,7 @@ COP4610 Project 1: Implementing a Shell
 - makefile
 - gitignore
 - readme (title, group members, this)
+- external execution of commands
 ##### Daniel Division of Labor
 - Parsing
 - Resolving Path Shortcuts
