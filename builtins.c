@@ -34,7 +34,8 @@ int cd(char* path) {
 		}
 		else {
 			//failed for some reason
-			printf("Could not change directory: %d\n", errno);
+			perror("Couldnt change directory");
+			//printf("Could not change directory: %s\n", strerror(errno));
 			return -1;
 		}
 	}
