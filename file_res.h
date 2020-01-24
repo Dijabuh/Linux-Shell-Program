@@ -1,5 +1,4 @@
 //Header for file_res.c
-#include <stdbool.h>
 
 typedef struct
 {
@@ -7,7 +6,7 @@ typedef struct
 	int numParts;
 } pathparts;
 
-bool isPath(char* str);
+int isPath(char* str);
 char* substr(char* str, int start, int end);
 void splitString(pathparts* ret, char* str, char c);
 char* getAbsPathname(char* str);

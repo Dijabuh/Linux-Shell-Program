@@ -7,12 +7,12 @@
 #include "file_res.h"
 
 //Checks if a given string is a pathname
-//Returns true if it has a / in it
-bool isPath(char* str) {
+//Returns  if it has a / in it
+int isPath(char* str) {
 	if (strchr(str, '/') == NULL) {
-		return false;
+		return 0;
 	}
-	return true;
+	return 1;
 }
 
 //function to get a substring of a given string

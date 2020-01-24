@@ -21,9 +21,25 @@ int main(){
 
 		getTokens(&instr);
 		//do something with the instruction here	
-		char* path = getAbsPathname(instr.tokens[0]);
-		printf("%s\n", path);
-		free(path);
+	
+		if(isPath(instr.tokens[0])){
+			printf("Is a path\n");
+			char* path = getAbsPathname(instr.tokens[0]);
+			printf("%s\n", path);
+			free(path);
+		}
+		else {
+			printf("Is a command\n");
+			char* cmdpath = getPath(instr.tokens[0]);
+			if (cmdpath != NULL) {
+				printf("Full path: %s\n", cmdpath);
+			}
+			else {
+				printf("Command not found\n");
+			}
+			free(cmdpath);
+		}
+
 		clearInstruction(&instr);
 	}
 
