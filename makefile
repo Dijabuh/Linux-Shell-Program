@@ -2,7 +2,10 @@ CC = gcc
 TARGET = shell
 STND = -std=c99
 
-$(TARGET): $(TARGET).o parser.o file_res.o execution.o
+EXE = execution
+BUILTIN = builtins
+
+$(TARGET): $(TARGET).o parser.o file_res.o $(EXE).o $(BUILTIN).o
 	$(CC) $^ -o $@ $(STND)
 
 $(TARGET).o: $(TARGET).c
@@ -14,8 +17,11 @@ parser.o: parser.c
 file_res.o: file_res.c
 	$(CC) -c file_res.c -o file_res.o $(STND)
 
-execution.o: execution.c
-	$(CC) -c execution.c -o execution.o $(STND)
+$(EXE).o: $(EXE).c
+	$(CC) -c $(EXE).c -o $(EXE).o $(STND)
+
+$(BUILTIN).o: $(BUILTIN).c
+	$(CC) -c $(BUILTIN).c -o $(BUILTIN).o $(STND)
 
 clean:
 	rm -rf *.o *~ $(TARGET)
