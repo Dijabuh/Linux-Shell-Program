@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "file_res.h"
 
 //Checks if a given string is a pathname
@@ -131,3 +132,37 @@ char* getAbsPathname(char* str) {
 
 	return absPath;
 }
+
+//Retrieves the path of a given command from the $PATH variable
+//Returns NULL if the file doesnt exist
+char* getPath(char* cmd) {
+	int pathVarLen = strlen(getenv("PATH"));
+	char* pathVar = (char*) malloc((pathVarLen + 1) * sizeof(char));
+	strcpy(pathVar, getenv("PATH"));
+	
+	int cmdLen = strlen(cmd);
+
+	//Split the $PATH variable up into a list of pathnames seperated by :
+	pathparts pathList;
+	splitString(&pathList, pathVar, ':');
+
+	//loop through all paths in list
+	//add cmd onto them
+	//if the file exists, return it
+	for(int i = 0; i < pathList.numParts; i++) {
+		int pathLen = strlen(pathList.parts[i]);
+		char* curPath = (char*) malloc((pathLen + cmdLen + 1) * sizeof(char));
+		
+		//get current path and add cmd onto it
+		strcpy(curPath, pathList.parts[i]);
+		strcat(curPath, cmd);
+
+		//check if it exists
+		if(access(curPath, F_OK) == 0) {
+			return curPath;
+		}
+	}
+
+	return NULL;
+}
+
