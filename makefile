@@ -4,8 +4,9 @@ STND = -std=c99
 
 EXE = execution
 BUILTIN = builtins
+REDIRECT = redirection
 
-$(TARGET): $(TARGET).o parser.o file_res.o $(EXE).o $(BUILTIN).o
+$(TARGET): $(TARGET).o parser.o file_res.o $(EXE).o $(BUILTIN).o $(REDIRECT).o
 	$(CC) $^ -o $@ $(STND)
 
 $(TARGET).o: $(TARGET).c
@@ -17,11 +18,14 @@ parser.o: parser.c
 file_res.o: file_res.c
 	$(CC) -c file_res.c -o file_res.o $(STND)
 
-$(EXE).o: $(EXE).c
+$(EXE).o: $(EXE).c $(EXE).h
 	$(CC) -c $(EXE).c -o $(EXE).o $(STND)
 
-$(BUILTIN).o: $(BUILTIN).c
+$(BUILTIN).o: $(BUILTIN).c $(BUILTIN).h
 	$(CC) -c $(BUILTIN).c -o $(BUILTIN).o $(STND)
+
+$(REDIRECT).o: $(REDIRECT).c $(REDIRECT).h
+	$(CC) -c $(REDIRECT).c -o $(REDIRECT).o $(STND)
 
 clean:
 	rm -rf *.o *~ $(TARGET)
