@@ -157,7 +157,6 @@ char* getPath(char* cmd) {
 		strcpy(curPath, pathList.parts[i]);
 		strcat(curPath, "/");
 		strcat(curPath, cmd);
-		printf("%s\n", curPath);
 
 		//check if it exists
 		if(access(curPath, F_OK) == 0) {
