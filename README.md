@@ -27,6 +27,7 @@ COP4610 Project 1: Implementing a Shell
 - gitignore
 - readme (title, group members, this)
 - external execution of commands
+- IO redirection
 ##### Daniel Division of Labor
 - Parsing
 - Resolving Path Shortcuts
