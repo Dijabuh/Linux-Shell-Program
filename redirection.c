@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include "redirection.h"
@@ -9,9 +10,12 @@ void redirection(char** cmd){
 	bool input_redir = (redirection_symbol == '<');
 	int file_desc;
 
-	if(input_redir)
-		file_desc = open(f_input, O_RDONLY);
-	else
+	if(input_redir){
+		if(access(f_input, F_OK) != -1)
+			file_desc = open(f_input, O_RDONLY);
+		else
+			printf("Unable to open file %s\n", f_input);
+	} else
 		file_desc = open(f_input, O_WRONLY);
 
 	link_cmd_path(cmd, file_desc, input_redir);
