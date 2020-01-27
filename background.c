@@ -21,13 +21,13 @@ void addProcess(processes* proc, int pid, instruction* instr) {
 
 		//create a single char* string out of each token in instr
 		char* temp = NULL;
-		for(int i = 0; i < instr->numTokens; i++) {
+		for(int i = 0; i < instr->numTokens - 1; i++) {
 			if(i == 0) {
 				temp = (char*) malloc((strlen(instr->tokens[0]) + 1) * sizeof(char));
 				strcpy(temp, instr->tokens[0]);
 			}
 			else {
-				temp = (char*) realloc(temp, (strlen(instr->tokens[i]) + 2) * sizeof(char));
+				temp = (char*) realloc(temp, ((strlen(temp) + strlen(instr->tokens[i]) + 2) * sizeof(char)));
 				strcat(temp, " ");
 				strcat(temp, instr->tokens[i]);
 			}
@@ -46,13 +46,13 @@ void addProcess(processes* proc, int pid, instruction* instr) {
 
 		//create a single char* string out of each token in instr
 		char* temp = NULL;
-		for(int i = 0; i < instr->numTokens; i++) {
+		for(int i = 0; i < instr->numTokens - 1; i++) {
 			if(i == 0) {
 				temp = (char*) malloc((strlen(instr->tokens[0]) + 1) * sizeof(char));
 				strcpy(temp, instr->tokens[0]);
 			}
 			else {
-				temp = (char*) realloc(temp, (strlen(instr->tokens[i]) + 2) * sizeof(char));
+				temp = (char*) realloc(temp, (strlen(temp) + strlen(instr->tokens[i]) + 2) * sizeof(char));
 				strcat(temp, " ");
 				strcat(temp, instr->tokens[i]);
 			}
