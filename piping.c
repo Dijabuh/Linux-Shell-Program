@@ -1,5 +1,6 @@
 #include "piping.h"
 #include "file_res.h"
+#include "builtins.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -214,8 +215,33 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				close(cmds[0]->fdout);
 
 				//execute command
-				execv(cmds[0]->cmd[0], cmds[0]->cmd);
-				fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				char* command = cmds[i]->cmd[0];
+				//check if command is one of the builtins
+				if(strcmp(command, "exit") == 0) {
+					//need to pass num instructions run somehow
+					EXIT(0);
+				}
+				else if (strcmp(command, "cd") == 0) {
+					if(cmds[i]->length == 2) {
+						cd(cmds[i]->cmd[1]);
+					}
+					else if(cmds[i]->length == 1) {
+						cd(NULL);
+					}
+					else {
+						printf("Too many arguements for cd\n");
+					}
+				}
+				else if (strcmp(command, "jobs") == 0) {
+					//fill in when jobs is implemented
+				}
+				else if (strcmp(command, "echo") == 0) {
+					//fill in when jobs is implemented
+				}
+				else {
+					execv(cmds[0]->cmd[0], cmds[0]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				}
 				exit(1);
 			}
 			else {
@@ -242,8 +268,33 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				close(cmds[i]->fdin);
 
 				//execute command
-				execv(cmds[i]->cmd[0], cmds[i]->cmd);
-				fprintf(stderr, "Problem executing %s\n", cmds[i]->cmd[0]);
+				char* command = cmds[i]->cmd[0];
+				//check if command is one of the builtins
+				if(strcmp(command, "exit") == 0) {
+					//need to pass num instructions run somehow
+					EXIT(0);
+				}
+				else if (strcmp(command, "cd") == 0) {
+					if(cmds[i]->length == 2) {
+						cd(cmds[i]->cmd[1]);
+					}
+					else if(cmds[i]->length == 1) {
+						cd(NULL);
+					}
+					else {
+						printf("Too many arguements for cd\n");
+					}
+				}
+				else if (strcmp(command, "jobs") == 0) {
+					//fill in when jobs is implemented
+				}
+				else if (strcmp(command, "echo") == 0) {
+					//fill in when jobs is implemented
+				}
+				else {
+					execv(cmds[0]->cmd[0], cmds[0]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				}
 				exit(1);
 			}
 			else {
@@ -272,8 +323,33 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				close(cmds[i]->fdin);
 
 				//execute command
-				execv(cmds[i]->cmd[0], cmds[i]->cmd);
-				fprintf(stderr, "Problem executing %s\n", cmds[i]->cmd[0]);
+				char* command = cmds[i]->cmd[0];
+				//check if command is one of the builtins
+				if(strcmp(command, "exit") == 0) {
+					//need to pass num instructions run somehow
+					EXIT(0);
+				}
+				else if (strcmp(command, "cd") == 0) {
+					if(cmds[i]->length == 2) {
+						cd(cmds[i]->cmd[1]);
+					}
+					else if(cmds[i]->length == 1) {
+						cd(NULL);
+					}
+					else {
+						printf("Too many arguements for cd\n");
+					}
+				}
+				else if (strcmp(command, "jobs") == 0) {
+					//fill in when jobs is implemented
+				}
+				else if (strcmp(command, "echo") == 0) {
+					//fill in when jobs is implemented
+				}
+				else {
+					execv(cmds[0]->cmd[0], cmds[0]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				}
 				exit(1);
 			}
 			else {
