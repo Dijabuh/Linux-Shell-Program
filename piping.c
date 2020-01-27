@@ -21,22 +21,26 @@ int pipeParser(instruction* instr, int bg) {
 	//Next check for io redirection in
 	char* filein = NULL;
 	int infound = 0;
+	int pipefound = 0;
 	for(int i = 0; i < instr->numTokens; i++) {
 		if(!infound && strcmp(instr->tokens[i], "|") == 0) {
-			//error, io in must be before first pipe
-			fprintf(stderr, "Invalid use of < token\n");
-			return -1;
+			pipefound = 1;
 		}
 		else if(infound && strcmp(instr->tokens[i], "<") == 0) {
 			//error, no more than 1 io redirection in
-			fprintf(stderr, "Invalid use of < token\n");
+			fprintf(stderr, "2Invalid use of < token\n");
 			free(filein);
 			return -1;
 		}
 		else if(!infound && strcmp(instr->tokens[i], "<") == 0) {
 			if(i == 0) {
 				//error, < cant be first token
-				fprintf(stderr, "Invalid use of < token\n");
+				fprintf(stderr, "3Invalid use of < token\n");
+				return -1;
+			}
+			if(pipefound) {
+				//error, io in must be before first pipe
+				fprintf(stderr, "1Invalid use of < token\n");
 				return -1;
 			}
 			//check if 2 tokens ahead is a pipe
@@ -48,6 +52,11 @@ int pipeParser(instruction* instr, int bg) {
 					free(filein);
 					return -1;
 				}
+			}
+			else {
+				//error, can only be 1 token between < and pipe
+				fprintf(stderr, "1Invalid use of < token\n");
+				return -1;
 			}
 		}
 	}
@@ -118,30 +127,53 @@ int pipeParser(instruction* instr, int bg) {
 			temp->fdin = 0;
 			temp->fdout = 0;
 
-			//put the first token into temp
-			temp->cmd = (char**) malloc(sizeof(char*));
-			temp->cmd[0] = (char*) malloc((strlen(instr->tokens[i + 1]) + 1) * sizeof(char));
-			strcpy(temp->cmd[0], instr->tokens[i + 1]);
-			i++;
+			temp = NULL;
 		}
 		else if (i == instr->numTokens - 1) {
 			//if we are on the last token, add it to temp
 			//then add temp to cmds
-			temp->cmd = (char**) realloc(temp->cmd, (temp->length + 1) * sizeof(char*));
-			temp->cmd[temp->length] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
-			strcpy(temp->cmd[temp->length], instr->tokens[i]);
-			temp->length++;
+			if(temp == NULL) {
+				//create new cmd and add it to cmds
+				temp = (pipecmd*) malloc(sizeof(pipecmd));
+				temp->length = 1;
+				temp->fdin = 0;
+				temp->fdout = 0;
 
+				//put the first token into temp
+				temp->cmd = (char**) malloc(sizeof(char*));
+				temp->cmd[0] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
+				strcpy(temp->cmd[0], instr->tokens[i]);
+			}
+			else {
+				temp->cmd = (char**) realloc(temp->cmd, (temp->length + 1) * sizeof(char*));
+				temp->cmd[temp->length] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
+				strcpy(temp->cmd[temp->length], instr->tokens[i]);
+				temp->length++;
+			}
 			cmds = (pipecmd**) realloc(cmds, (numCmds + 1) * sizeof(pipecmd*));
 			cmds[numCmds] = temp;
 			numCmds++;
 		}
 		else {
 			//otherwise, add current token to temp
-			temp->cmd = (char**) realloc(temp->cmd, (temp->length + 1) * sizeof(char*));
-			temp->cmd[temp->length] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
-			strcpy(temp->cmd[temp->length], instr->tokens[i]);
-			temp->length++;
+			if(temp == NULL) {
+				//create new cmd and add it to cmds
+				temp = (pipecmd*) malloc(sizeof(pipecmd));
+				temp->length = 1;
+				temp->fdin = 0;
+				temp->fdout = 0;
+
+				//put the first token into temp
+				temp->cmd = (char**) malloc(sizeof(char*));
+				temp->cmd[0] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
+				strcpy(temp->cmd[0], instr->tokens[i]);
+			}
+			else {
+				temp->cmd = (char**) realloc(temp->cmd, (temp->length + 1) * sizeof(char*));
+				temp->cmd[temp->length] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
+				strcpy(temp->cmd[temp->length], instr->tokens[i]);
+				temp->length++;
+			}
 		}
 	}
 
@@ -149,7 +181,7 @@ int pipeParser(instruction* instr, int bg) {
 	for(int i = 0; i < numCmds; i++) {
 		char* command = cmds[i]->cmd[0];
 		//if it is one of the builtins, skip it
-		if(strcmp(command, "exit") == 0 ||strcmp(command, "cd") == 0 ||strcmp(command, "jobs") == 0||strcmp(command, "chot") == 0) {
+		if(strcmp(command, "exit") == 0 ||strcmp(command, "cd") == 0 ||strcmp(command, "jobs") == 0||strcmp(command, "echo") == 0) {
 			//do nothing
 		}
 
@@ -176,7 +208,7 @@ int pipeParser(instruction* instr, int bg) {
 	}
 
 	//check if we have 1 more command than pipes
-	if(numPipes != numCmds + 1) {
+	if(numPipes != numCmds - 1) {
 		//error
 		fprintf(stderr, "Invalid null command\n");
 		//need to free up cmds and temp
@@ -191,6 +223,12 @@ int pipeParser(instruction* instr, int bg) {
 		cmds[i + 1]->fdin = fd[0];
 	}
 
+	//insert null at end of each cmd
+	for(int i = 0; i < numCmds; i++) {
+		cmds[i]->cmd = (char**) realloc(cmds[i]->cmd, (cmds[i]->length + 1) * sizeof(char*));
+		cmds[i]->cmd[cmds[i]->length] = NULL;
+		cmds[i]->length++;
+	}
 	//run the pipe execution function and return its return value
 	return pipeExec(cmds, numCmds, filein, fileout, bg); 
 }
@@ -213,6 +251,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				close(STDOUT_FILENO);
 				dup(cmds[0]->fdout);
 				close(cmds[0]->fdout);
+				close(cmds[1]->fdin);
 
 				//execute command
 				char* command = cmds[i]->cmd[0];
@@ -255,6 +294,13 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 			if(pid == 0) {
 				//child(command)
 				//replace fds
+				
+				//redirect stdin
+				close(STDIN_FILENO);
+				dup(cmds[i]->fdin);
+				close(cmds[i]->fdin);
+				close(cmds[i - 1]->fdout);
+
 				if(fileout != NULL) {
 					//redirect stdout
 					int fd = open(fileout, O_WRONLY);
@@ -262,10 +308,6 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 					dup(fd);
 					close(fd);
 				}
-				//redirect stdin
-				close(STDIN_FILENO);
-				dup(cmds[i]->fdin);
-				close(cmds[i]->fdin);
 
 				//execute command
 				char* command = cmds[i]->cmd[0];
@@ -292,13 +334,19 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 					//fill in when jobs is implemented
 				}
 				else {
-					execv(cmds[0]->cmd[0], cmds[0]->cmd);
-					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+					execv(cmds[i]->cmd[0], cmds[i]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[i]->cmd[0]);
 				}
 				exit(1);
 			}
 			else {
 				//parent(shell)
+				//close each of the fd's for each command to be used for piping
+				for(int i = 0; i < length-1; i++) {
+					close(cmds[i]->fdout);
+					close(cmds[i + 1]->fdin);
+				}
+
 				if(!bg) {
 					//if its not running in the background, simply wait until last command is dont running
 					int status;
@@ -314,13 +362,15 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 			if(fork() == 0) {
 				//child(command)
 				//replace fds
-				close(STDOUT_FILENO);
-				dup(cmds[i]->fdout);
-				close(cmds[i]->fdout);
-
 				close(STDIN_FILENO);
 				dup(cmds[i]->fdin);
 				close(cmds[i]->fdin);
+				close(cmds[i - 1]->fdout);
+
+				close(STDOUT_FILENO);
+				dup(cmds[i]->fdout);
+				close(cmds[i]->fdout);
+				close(cmds[i + 1]->fdin);
 
 				//execute command
 				char* command = cmds[i]->cmd[0];
@@ -347,14 +397,16 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 					//fill in when jobs is implemented
 				}
 				else {
-					execv(cmds[0]->cmd[0], cmds[0]->cmd);
-					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+					execv(cmds[i]->cmd[0], cmds[i]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[i]->cmd[0]);
 				}
 				exit(1);
 			}
 			else {
 				//parent(shell)
 				//do nothing, just loop again
+				close(cmds[i]->fdin);
+				close(cmds[i-1]->fdout);
 			}
 		}
 	}

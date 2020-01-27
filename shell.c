@@ -5,6 +5,7 @@
 #include "file_res.h"
 #include "builtins.h"
 #include "execution.h"
+#include "piping.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -93,6 +94,9 @@ int main(){
 			if(strchr(instr.tokens[i], '|') != NULL) {
 				//run piping function
 				piping = 1;
+				int pid = 0;
+				pid = pipeParser(&instr, backgroundexec);
+				break;
 			}
 		}
 
@@ -108,6 +112,7 @@ int main(){
 			if(strchr(instr.tokens[i], '<') != NULL || strchr(instr.tokens[i], '>') != NULL) {
 				//run io redirection function
 				ioredir = 1;
+				break;
 			}
 		}
 
