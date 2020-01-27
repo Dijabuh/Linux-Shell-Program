@@ -22,7 +22,7 @@ void execute(char** cmd){
 	}
 }
 
-void execute_bckgrd(char** cmd){
+void execute_bckgrnd(char** cmd){
 
 	int status;
 	pid_t pid = fork();

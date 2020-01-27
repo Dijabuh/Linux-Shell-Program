@@ -2,9 +2,13 @@
 
 #include "parser.h"
 
-void redirection(instruction* instr_ptr);
+void redirection(instruction* instr_ptr, bool background);
 
-void link_cmd_path(char** cmd, int file_desc, bool io_dir);
+void single_redirection(char** cmd, int file_desc,
+	bool direction, bool background);
+
+void double_redirection(char** cmd, int file_desc1,
+	int file_desc2, bool direction, bool background);
 
 int parsing_rules(char** cmd, int tokens);
 

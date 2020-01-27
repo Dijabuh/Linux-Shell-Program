@@ -1,3 +1,3 @@
 void execute(char** cmd);
 
-void execute_bckgrd(char** cmd);
+void execute_bckgrnd(char** cmd);
