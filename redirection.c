@@ -41,6 +41,9 @@ void redirection(instruction* instr_ptr, bool background){
 	
 		get_cmd(instr_ptr);
 
+		for(int i = 0; i < instr_ptr->numTokens; ++i)
+			printf("%s\n", instr_ptr->tokens[i]);
+
 		single_redirection(instr_ptr->tokens, file_desc, (
 			redir_case == 0 ? true : false), background);
 
@@ -88,16 +91,13 @@ bool direction, bool background){
 
 		dup(file_desc);
 		close(file_desc);
-		
-		// Execute process here
-		if(!background)
-			execute(cmd);
-		else
+
+		if(background)
 			execute_bckgrnd(cmd);
-	} else{
-		// Parent?
+		else
+			execute(cmd);
+	} else
 		close(file_desc);
-	}
 }
 
 void double_redirection(char** cmd, int file_desc1,
@@ -225,13 +225,17 @@ void get_cmd(instruction* instr_ptr){
 	}
 
 	if(end_cmd == -1) return;
+	
+	instr_ptr->numTokens = end_cmd;
+	instr_ptr->tokens = realloc(instr_ptr->tokens, instr_ptr->numTokens * sizeof(*instr_ptr->tokens));
 
+	/*
 	for(int i = 0; i < instr_ptr->numTokens; ++i){
 		// Don't need to overwrite since cmd at front, need to cut off rest
 		if(i >= end_cmd)
 			free(instr_ptr->tokens[i]);
 	}
-	instr_ptr->numTokens = end_cmd;
+	*/
 
 	for(int i = 0; i < instr_ptr->numTokens-1; ++i)
 		printf(instr_ptr->tokens[i]);
