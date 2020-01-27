@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "execution.h"
@@ -17,9 +19,9 @@ void redirection(instruction* instr_ptr, bool background){
 	int file_desc;
 	int file_desc2;
 
-	char** cmd;
+	char** cmd = NULL;
 	char* file = fget_first(instr_ptr->tokens, instr_ptr->numTokens);
-	char* file2;
+	char* file2 = NULL;
 
 	if(redir_case == 0 || redir_case == 1){
 
@@ -27,11 +29,11 @@ void redirection(instruction* instr_ptr, bool background){
 			file_desc = open(file, O_RDONLY);
 		else if(redir_case == 1){
 			// Opens a new file for output if non-existent
-			FILE* fp;
-			fp = fopen(file, "w+");
-			if(!fp){ fp = fopen(file, "w"); }
-			fclose(fp);
+			if(access(file, F_OK) != -1)
+				remove(file);
 
+			FILE* fp = fopen(file, "w");
+			fclose(fp);
 			file_desc = open(file, O_WRONLY);
 		} else{
 			printf("Unable to open file %s\n", file);
@@ -71,15 +73,28 @@ void redirection(instruction* instr_ptr, bool background){
 	}
 
 	// If unable to open files, breaks to these
-	free(cmd);
-	free(file);
-	free(file2);
+	if(cmd != NULL){
+		free(cmd);
+		cmd = NULL;
+	}
+	if(file != NULL){
+		free(file);
+		file = NULL;
+	}
+	if(file2 != NULL){
+		free(file2);
+		file2 = NULL;
+	}
 }
 
 void single_redirection(char** cmd, int file_desc,
 bool direction, bool background){
 
-	if(fork() == 0){
+	int status;
+	pid_t pid = fork();
+
+	if(pid == -1) return;
+	else if(pid == 0){
 		
 		if(direction)
 			close(STDIN_FILENO);
@@ -89,18 +104,27 @@ bool direction, bool background){
 		dup(file_desc);
 		close(file_desc);
 			
+		execv(cmd[0], cmd);
+		printf("Problem executing %s\n", cmd[0]);
+		return;
+	} else{
 		if(background)
-			execute_bckgrnd(cmd);
+			waitpid(pid, &status, WNOHANG);
 		else
-			execute(cmd);
-	} else
+			waitpid(pid, &status, 0);
+		
 		close(file_desc);
+	}
 }
 
 void double_redirection(char** cmd, int file_desc1,
 int file_desc2, bool direction, bool background){
+
+	int status;
+	pid_t pid = fork();
 	
-	if(fork() == 0){
+	if(pid == -1) return;
+	else if(pid == 0){
 		
 		if(direction){
 			close(STDIN_FILENO);
@@ -117,14 +141,16 @@ int file_desc2, bool direction, bool background){
 			dup(file_desc2);
 			close(file_desc2);
 		}
-
-		// Execute process here
-		if(!background)
-			execute(cmd);
-		else
-			execute_bckgrnd(cmd);
+		
+		execv(cmd[0], cmd);
+		printf("Problem executing %s\n", cmd[0]);
+		return;
 	} else{
-		// Parent?
+		if(background)
+			waitpid(pid, &status, WNOHANG);
+		else
+			waitpid(pid, &status, 0);
+		
 		close(file_desc1);
 		close(file_desc2);
 	}
