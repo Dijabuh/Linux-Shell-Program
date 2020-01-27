@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "execution.h"
@@ -88,7 +90,11 @@ void redirection(instruction* instr_ptr, bool background){
 void single_redirection(char** cmd, int file_desc,
 bool direction, bool background){
 
-	if(fork() == 0){
+	int status;
+	pid_t pid = fork();
+
+	if(pid == -1) return;
+	else if(pid == 0){
 		
 		if(direction)
 			close(STDIN_FILENO);
@@ -98,18 +104,27 @@ bool direction, bool background){
 		dup(file_desc);
 		close(file_desc);
 			
+		execv(cmd[0], cmd);
+		printf("Problem executing %s\n", cmd[0]);
+		return;
+	} else{
 		if(background)
-			execute_bckgrnd(cmd);
+			waitpid(pid, &status, WNOHANG);
 		else
-			execute(cmd);
-	} else
+			waitpid(pid, &status, 0);
+		
 		close(file_desc);
+	}
 }
 
 void double_redirection(char** cmd, int file_desc1,
 int file_desc2, bool direction, bool background){
+
+	int status;
+	pid_t pid = fork();
 	
-	if(fork() == 0){
+	if(pid == -1) return;
+	else if(pid == 0){
 		
 		if(direction){
 			close(STDIN_FILENO);
@@ -126,14 +141,16 @@ int file_desc2, bool direction, bool background){
 			dup(file_desc2);
 			close(file_desc2);
 		}
-
-		// Execute process here
-		if(!background)
-			execute(cmd);
-		else
-			execute_bckgrnd(cmd);
+		
+		execv(cmd[0], cmd);
+		printf("Problem executing %s\n", cmd[0]);
+		return;
 	} else{
-		// Parent?
+		if(background)
+			waitpid(pid, &status, WNOHANG);
+		else
+			waitpid(pid, &status, 0);
+		
 		close(file_desc1);
 		close(file_desc2);
 	}
