@@ -7,6 +7,7 @@
 #include "execution.h"
 #include "piping.h"
 #include "redirection.h"
+#include "background.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,6 +19,11 @@ int main(){
 	instr.tokens = NULL;
 	instr.numTokens = 0;
 
+	processes procs;
+	procs.pids = NULL;
+	procs.cmds = NULL;
+	procs.length = 0;
+
 	while (1) {
 		char* user = getenv("USER");
 		char* machine = getenv("MACHINE");
@@ -26,6 +32,14 @@ int main(){
 
 		getTokens(&instr);
 
+		//used for keeping track of the full instruction for background processes
+		instruction instrbg;
+		instrbg.numTokens = instr.numTokens;
+		instrbg.tokens = (char**) malloc(instr.numTokens * sizeof(char*));
+		for(int i = 0; i < instr.numTokens; i++) {
+			instrbg.tokens[i] = (char*) malloc((strlen(instr.tokens[i]) + 1) * sizeof(char));
+			strcpy(instrbg.tokens[i], instr.tokens[i]);
+		}
 
 		//order of executing
 		//Remove beggining & if it exists
@@ -164,7 +178,13 @@ int main(){
 			if(access(path, F_OK) == 0) {
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;
-				execute(instr.tokens);	
+				if(backgroundexec) {
+					int pid = execute_bckgrnd(instr.tokens);	
+					addProcess(&procs, pid, &instrbg);
+				}
+				else {
+					execute(instr.tokens);	
+				}
 				numInstructionsRun++;
 			}
 			else {
@@ -176,7 +196,13 @@ int main(){
 			if (path != NULL) {
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;
-				execute(instr.tokens);	
+				if(backgroundexec) {
+					int pid = execute_bckgrnd(instr.tokens);	
+					addProcess(&procs, pid, &instrbg);
+				}
+				else {
+					execute(instr.tokens);	
+				}
 				numInstructionsRun++;
 			}
 			else {
@@ -184,6 +210,7 @@ int main(){
 			}
 		}
 		clearInstruction(&instr);
+		checkProcesses(&procs);
 	}
 
 	return 0;

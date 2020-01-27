@@ -22,7 +22,7 @@ void execute(char** cmd){
 	}
 }
 
-void execute_bckgrnd(char** cmd){
+int execute_bckgrnd(char** cmd){
 
 	int status;
 	pid_t pid = fork();
@@ -34,6 +34,6 @@ void execute_bckgrnd(char** cmd){
 		printf("Problem executing %s\n", cmd[0]);
 		exit(1);
 	} else{
-		waitpid(pid, &status, WNOHANG);
+		return pid;
 	}
 }

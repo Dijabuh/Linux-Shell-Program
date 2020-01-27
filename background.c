@@ -9,7 +9,7 @@
 //function to add a process to the list of background processes
 //prints out [position in queue] [pid]
 void addProcess(processes* proc, int pid, instruction* instr) {
-	printf("[%i] [%i]\n", proc->length, pid);
+	printf("[%i] [%i]\n", proc->length + 1, pid);
 
 	//add new instruction to proc
 	if(proc->length == 0) {
@@ -28,8 +28,8 @@ void addProcess(processes* proc, int pid, instruction* instr) {
 			}
 			else {
 				temp = (char*) realloc(temp, (strlen(instr->tokens[i]) + 2) * sizeof(char));
-				strcpy(temp, " ");
-				strcpy(temp, instr->tokens[i]);
+				strcat(temp, " ");
+				strcat(temp, instr->tokens[i]);
 			}
 		}
 
@@ -53,8 +53,8 @@ void addProcess(processes* proc, int pid, instruction* instr) {
 			}
 			else {
 				temp = (char*) realloc(temp, (strlen(instr->tokens[i]) + 2) * sizeof(char));
-				strcpy(temp, " ");
-				strcpy(temp, instr->tokens[i]);
+				strcat(temp, " ");
+				strcat(temp, instr->tokens[i]);
 			}
 		}
 
@@ -80,9 +80,20 @@ void checkProcesses(processes* proc) {
 
 			//remove it from queue
 			processes* temp;
-			temp->pids = (int*) malloc((proc->length - 1) * sizeof(int));
-			temp->cmds = (char**) malloc((proc->length - 1) * sizeof(char*));
-			temp->length = proc->length - 1;
+			if(proc->length > 1) {
+				temp->pids = (int*) malloc((proc->length - 1) * sizeof(int));
+				temp->cmds = (char**) malloc((proc->length - 1) * sizeof(char*));
+				temp->length = proc->length - 1;
+			}
+			else {
+				free(proc->pids);
+				free(proc->cmds[0]);
+				free(proc->cmds);
+				proc->pids = NULL;
+				proc->cmds = NULL;
+				proc->length = 0;
+				break;
+			}
 
 			if(i == 0) {
 				//first in queue
