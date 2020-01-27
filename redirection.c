@@ -41,9 +41,6 @@ void redirection(instruction* instr_ptr, bool background){
 	
 		get_cmd(instr_ptr);
 
-		for(int i = 0; i < instr_ptr->numTokens; ++i)
-			printf("%s\n", instr_ptr->tokens[i]);
-
 		single_redirection(instr_ptr->tokens, file_desc, (
 			redir_case == 0 ? true : false), background);
 
@@ -227,13 +224,18 @@ void get_cmd(instruction* instr_ptr){
 	if(end_cmd == -1) return;
 	
 	instr_ptr->numTokens = end_cmd;
-	instr_ptr->tokens = realloc(instr_ptr->tokens, instr_ptr->numTokens * sizeof(*instr_ptr->tokens));
+	instr_ptr->tokens = realloc(instr_ptr->tokens, instr_ptr->numTokens+1 * sizeof(*instr_ptr->tokens));
+	instr_ptr->tokens[instr_ptr->numTokens] = NULL;
 
 	char* path = getPath(instr_ptr->tokens[0]);
 	if (path != NULL){
 		free(instr_ptr->tokens[0]);
 		instr_ptr->tokens[0] = path;
 	}
+
+	for(int i = 0; i < instr_ptr->numTokens; ++i)
+		printf("%s\n", instr_ptr->tokens[i]);
+	if(instr_ptr->tokens[instr_ptr->numTokens] == NULL) printf("TERM\n");
 }
 
 char* fget_first(char** tokens, int numTokens){
