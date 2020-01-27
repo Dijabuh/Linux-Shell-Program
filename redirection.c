@@ -27,9 +27,10 @@ void redirection(instruction* instr_ptr, bool background){
 			file_desc = open(file, O_RDONLY);
 		else if(redir_case == 1){
 			// Opens a new file for output if non-existent
-			FILE* fp;
-			fp = fopen(file, "w+");
-			if(!fp){ fp = fopen(file, "w"); }
+			if(access(file, F_OK) != -1)
+				remove(file);
+
+			FILE* fp = fopen(file, "w");
 			fclose(fp);
 
 			file_desc = open(file, O_WRONLY);
