@@ -91,7 +91,7 @@ bool direction, bool background){
 
 		dup(file_desc);
 		close(file_desc);
-
+			
 		if(background)
 			execute_bckgrnd(cmd);
 		else
@@ -229,17 +229,11 @@ void get_cmd(instruction* instr_ptr){
 	instr_ptr->numTokens = end_cmd;
 	instr_ptr->tokens = realloc(instr_ptr->tokens, instr_ptr->numTokens * sizeof(*instr_ptr->tokens));
 
-	/*
-	for(int i = 0; i < instr_ptr->numTokens; ++i){
-		// Don't need to overwrite since cmd at front, need to cut off rest
-		if(i >= end_cmd)
-			free(instr_ptr->tokens[i]);
+	char* path = getPath(instr_ptr->tokens[0]);
+	if (path != NULL){
+		free(instr_ptr->tokens[0]);
+		instr_ptr->tokens[0] = path;
 	}
-	*/
-
-	for(int i = 0; i < instr_ptr->numTokens-1; ++i)
-		printf(instr_ptr->tokens[i]);
-	printf("%s\n", instr_ptr->tokens[instr_ptr->numTokens-1]);
 }
 
 char* fget_first(char** tokens, int numTokens){
