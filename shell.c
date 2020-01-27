@@ -6,6 +6,7 @@
 #include "builtins.h"
 #include "execution.h"
 #include "piping.h"
+#include "redirection.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -111,6 +112,7 @@ int main(){
 		for(int i = 0; i < instr.numTokens; i++) {
 			if(strchr(instr.tokens[i], '<') != NULL || strchr(instr.tokens[i], '>') != NULL) {
 				//run io redirection function
+				// redirection(&instr, backgroundexec);
 				ioredir = 1;
 				break;
 			}
