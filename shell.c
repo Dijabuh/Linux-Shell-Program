@@ -23,7 +23,16 @@ int main(){
 		printf("%s@%s : %s > ", user, machine, pwd);
 
 		getTokens(&instr);
-	
+
+
+		//order of executing
+		//Remove beggining & if it exists
+		//Remove trailing & if it exists and flag for background execution
+		//Make sure there are no & in the middle of the tokens
+		//Check for | and run piping execution if its there
+		//Check for < or > and run io redirection if its there
+		//Otherwise run execution code we currently have
+		
 		char* command = instr.tokens[0];
 		//check if command is one of the builtins
 		if(strcmp(command, "exit") == 0) {
