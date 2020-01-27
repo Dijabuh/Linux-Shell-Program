@@ -154,15 +154,15 @@ int parsing_rules(char** cmd, int tokens){
 
 			if(!alt){
 				// Checks for rule 3
-				if(multi_redir == 0)
+				if(multi_redir == 0){
 					if(strcmp(cmd[i], input) == 0){ 
 						return -1; 
 					}
-				else if(multi_redir == 1)
+				} else if(multi_redir == 1){
 					if(strcmp(cmd[i], output) == 0){ 
 						return -1;
 					}
-				else{
+				} else{
 					// Sets which <> called
 					if(strcmp(cmd[i], input) == 0){
 						multi_redir = 0;
