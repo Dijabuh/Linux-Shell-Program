@@ -10,4 +10,4 @@ typedef struct
 } pipecmd;
 
 int pipeParser(instruction* instr, int bg);
-int pipeExec(pipecmd* cmds, int length, char* filein, char* fileout, int bg);
+int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg);

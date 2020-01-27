@@ -97,6 +97,7 @@ int main(){
 		}
 
 		if(piping) {
+			clearInstruction(&instr);
 			continue;
 		}
 
@@ -111,6 +112,7 @@ int main(){
 		}
 
 		if(ioredir) {
+			clearInstruction(&instr);
 			continue;
 		}
 
@@ -151,7 +153,6 @@ int main(){
 		//instr.tokens[0] could be an &
 		else if(isPath(command)){
 			char* path = getAbsPathname(command);
-			printf("%s\n", path);
 			if(access(path, F_OK) == 0) {
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;
