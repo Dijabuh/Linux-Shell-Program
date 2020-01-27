@@ -32,18 +32,77 @@ int main(){
 		//Check for | and run piping execution if its there
 		//Check for < or > and run io redirection if its there
 		//Otherwise run execution code we currently have
-		
+	
+		//First check if 1st token is &
+		if(strcmp(instr.tokens[0], "&") == 0) {
+			//if so, remove it and ignore
+			int newlen = instr.numTokens - 1;
+			char** newtokens = (char**) malloc(newlen * sizeof(char*));
+			for(int i = 0; i < newlen; i++) {
+				newtokens[i] = instr.tokens[i + 1];
+			}
+
+			//free the first token and the old tokens array
+			free(instr.tokens[0]);
+			free(instr.tokens);
+
+			//assign instr.tokens to newtokens
+			instr.tokens = newtokens;
+			instr.numTokens = newlen;
+		}
+
+		//Next check if last token is &
+		int backgroundexec = 0;
+		if(strcmp(instr.tokens[instr.numTokens - 1], "&") == 0) {
+			//if so, remove it and flag for background execution
+			backgroundexec = 1;
+
+			int newlen = instr.numTokens - 1;
+			char** newtokens = (char**) malloc(newlen * sizeof(char*));
+			for(int i = 0; i < newlen; i++) {
+				newtokens[i] = instr.tokens[i];
+			}
+
+			//free the first token and the old tokens array
+			free(instr.tokens[instr.numTokens - 1]);
+			free(instr.tokens);
+
+			//assign instr.tokens to newtokens
+			instr.tokens = newtokens;
+			instr.numTokens = newlen;
+		}
+	
+		int error = 0;
+		//Then check that there are not anymore & in the list of tokens
+		for(int i = 0; i < instr.numTokens; i++) {
+			if(instr.tokens[i] != NULL && strchr(instr.tokens[i], '&') != NULL) {
+				fprintf(stderr, "Invalid user of & token\n");
+				clearInstruction(&instr);
+				error = 1;
+			}
+		}
+
+		if(error) {
+			continue;
+		}
+
+		//add in null to end of tokens
+		addNull(&instr);
+
+		//Not piping or io redirection, so just execute the command
+		//Need to add in background execution
 		char* command = instr.tokens[0];
+
 		//check if command is one of the builtins
 		if(strcmp(command, "exit") == 0) {
 			EXIT(numInstructionsRun);
 		}
 		else if (strcmp(command, "cd") == 0) {
-			if(instr.numTokens == 3) {
+			if(instr.numTokens == 2) {
 				cd(instr.tokens[1]);
 				numInstructionsRun++;
 			}
-			else if(instr.numTokens == 2) {
+			else if(instr.numTokens == 1) {
 				cd(NULL);
 				numInstructionsRun++;
 			}
@@ -57,7 +116,7 @@ int main(){
 		else if (strcmp(command, "echo") == 0) {
 			numInstructionsRun++;
 		}
-		
+
 		//Check if first token, ie the command is a path
 		//if it is, resolve the pathname, check if it exists, if it does run it
 		//need to switch from using instr.tokens[0] to a char*
@@ -76,11 +135,11 @@ int main(){
 		}
 		else {
 			printf("Is a command\n");
-			char* cmdpath = getPath(command);
-			if (cmdpath != NULL) {
-				printf("Full path: %s\n", cmdpath);
+			char* path = getPath(command);
+			if (path != NULL) {
+				printf("Full path: %s\n", path);
 				free(instr.tokens[0]);
-				instr.tokens[0] = cmdpath;
+				instr.tokens[0] = path;
 				execute(instr.tokens);	
 				numInstructionsRun++;
 			}

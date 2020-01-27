@@ -56,7 +56,7 @@ void getTokens(instruction* instr)
 		temp = NULL;
 	} while ('\n' != getchar());    //until end of line is reached
 
-	addNull(instr);
+	//addNull(instr);
 }
 
 //reallocates instruction array to hold another token
