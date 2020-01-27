@@ -98,6 +98,7 @@ int main(){
 		}
 
 		if(piping) {
+			clearInstruction(&instr);
 			continue;
 		}
 
@@ -107,12 +108,14 @@ int main(){
 		for(int i = 0; i < instr.numTokens; i++) {
 			if(strchr(instr.tokens[i], '<') != NULL || strchr(instr.tokens[i], '>') != NULL) {
 				//run io redirection function
+				// redirection(&instr, backgroundexec);
 				ioredir = 1;
 			}
 		}
 
 		if(ioredir) {
-			// redirection(&instr, backgroundexec);
+			clearInstruction(&instr);
+			continue;
 		}
 
 		//add in null to end of tokens
@@ -152,7 +155,6 @@ int main(){
 		//instr.tokens[0] could be an &
 		else if(isPath(command)){
 			char* path = getAbsPathname(command);
-			printf("%s\n", path);
 			if(access(path, F_OK) == 0) {
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;

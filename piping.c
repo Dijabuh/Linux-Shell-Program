@@ -1,9 +1,13 @@
 #include "piping.h"
 #include "file_res.h"
+#include "builtins.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 int pipeParser(instruction* instr, int bg) {
 	int numPipes = 0;
@@ -120,6 +124,18 @@ int pipeParser(instruction* instr, int bg) {
 			strcpy(temp->cmd[0], instr->tokens[i + 1]);
 			i++;
 		}
+		else if (i == instr->numTokens - 1) {
+			//if we are on the last token, add it to temp
+			//then add temp to cmds
+			temp->cmd = (char**) realloc(temp->cmd, (temp->length + 1) * sizeof(char*));
+			temp->cmd[temp->length] = (char*) malloc((strlen(instr->tokens[i]) + 1) * sizeof(char));
+			strcpy(temp->cmd[temp->length], instr->tokens[i]);
+			temp->length++;
+
+			cmds = (pipecmd**) realloc(cmds, (numCmds + 1) * sizeof(pipecmd*));
+			cmds[numCmds] = temp;
+			numCmds++;
+		}
 		else {
 			//otherwise, add current token to temp
 			temp->cmd = (char**) realloc(temp->cmd, (temp->length + 1) * sizeof(char*));
@@ -129,4 +145,217 @@ int pipeParser(instruction* instr, int bg) {
 		}
 	}
 
+	//next, check that the first char* in each cmd in pipecmd is a valid file
+	for(int i = 0; i < numCmds; i++) {
+		char* command = cmds[i]->cmd[0];
+		//if it is one of the builtins, skip it
+		if(strcmp(command, "exit") == 0 ||strcmp(command, "cd") == 0 ||strcmp(command, "jobs") == 0||strcmp(command, "chot") == 0) {
+			//do nothing
+		}
+
+		else if(isPath(command)){
+			char* path = getAbsPathname(command);
+			if(access(path, F_OK) == 0) {
+				free(command);
+				cmds[i]->cmd[0] = path;
+			}
+			else {
+				printf("Command not found\n");
+			}
+		}
+		else {
+			char* path = getPath(command);
+			if (path != NULL) {
+				free(command);
+				cmds[i]->cmd[0] = path;
+			}
+			else {
+				printf("Command not found\n");
+			}
+		}
+	}
+
+	//check if we have 1 more command than pipes
+	if(numPipes != numCmds + 1) {
+		//error
+		fprintf(stderr, "Invalid null command\n");
+		//need to free up cmds and temp
+		return -1;
+	}
+
+	//fill in the fd's for each command to be used for piping
+	for(int i = 0; i < numPipes; i++) {
+		int fd[2];
+		pipe(fd);
+		cmds[i]->fdout = fd[1];
+		cmds[i + 1]->fdin = fd[0];
+	}
+
+	//run the pipe execution function and return its return value
+	return pipeExec(cmds, numCmds, filein, fileout, bg); 
+}
+
+int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
+	for(int i = 0; i < length; i++) {
+		if(i == 0) {
+			//first command
+			if(fork() == 0) {
+				//child(command)
+				//replace fd's
+				if(filein != NULL) {
+					//redirect stdin
+					int fd = open(filein, O_RDONLY);
+					close(STDIN_FILENO);
+					dup(fd);
+					close(fd);
+				}
+				//redirect stdout
+				close(STDOUT_FILENO);
+				dup(cmds[0]->fdout);
+				close(cmds[0]->fdout);
+
+				//execute command
+				char* command = cmds[i]->cmd[0];
+				//check if command is one of the builtins
+				if(strcmp(command, "exit") == 0) {
+					//need to pass num instructions run somehow
+					EXIT(0);
+				}
+				else if (strcmp(command, "cd") == 0) {
+					if(cmds[i]->length == 2) {
+						cd(cmds[i]->cmd[1]);
+					}
+					else if(cmds[i]->length == 1) {
+						cd(NULL);
+					}
+					else {
+						printf("Too many arguements for cd\n");
+					}
+				}
+				else if (strcmp(command, "jobs") == 0) {
+					//fill in when jobs is implemented
+				}
+				else if (strcmp(command, "echo") == 0) {
+					//fill in when jobs is implemented
+				}
+				else {
+					execv(cmds[0]->cmd[0], cmds[0]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				}
+				exit(1);
+			}
+			else {
+				//parent(shell)
+				//do nothing, just loop again
+			}
+		}
+		else if(i == length - 1) {
+			//last command
+			int pid = fork();
+			if(pid == 0) {
+				//child(command)
+				//replace fds
+				if(fileout != NULL) {
+					//redirect stdout
+					int fd = open(fileout, O_WRONLY);
+					close(STDOUT_FILENO);
+					dup(fd);
+					close(fd);
+				}
+				//redirect stdin
+				close(STDIN_FILENO);
+				dup(cmds[i]->fdin);
+				close(cmds[i]->fdin);
+
+				//execute command
+				char* command = cmds[i]->cmd[0];
+				//check if command is one of the builtins
+				if(strcmp(command, "exit") == 0) {
+					//need to pass num instructions run somehow
+					EXIT(0);
+				}
+				else if (strcmp(command, "cd") == 0) {
+					if(cmds[i]->length == 2) {
+						cd(cmds[i]->cmd[1]);
+					}
+					else if(cmds[i]->length == 1) {
+						cd(NULL);
+					}
+					else {
+						printf("Too many arguements for cd\n");
+					}
+				}
+				else if (strcmp(command, "jobs") == 0) {
+					//fill in when jobs is implemented
+				}
+				else if (strcmp(command, "echo") == 0) {
+					//fill in when jobs is implemented
+				}
+				else {
+					execv(cmds[0]->cmd[0], cmds[0]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				}
+				exit(1);
+			}
+			else {
+				//parent(shell)
+				if(!bg) {
+					//if its not running in the background, simply wait until last command is dont running
+					int status;
+					waitpid(pid, &status, 0);
+					return -1;
+				}
+				//if it is running in the background, return the pid
+				return pid;
+			}
+		}
+		else {
+			//command in middle
+			if(fork() == 0) {
+				//child(command)
+				//replace fds
+				close(STDOUT_FILENO);
+				dup(cmds[i]->fdout);
+				close(cmds[i]->fdout);
+
+				close(STDIN_FILENO);
+				dup(cmds[i]->fdin);
+				close(cmds[i]->fdin);
+
+				//execute command
+				char* command = cmds[i]->cmd[0];
+				//check if command is one of the builtins
+				if(strcmp(command, "exit") == 0) {
+					//need to pass num instructions run somehow
+					EXIT(0);
+				}
+				else if (strcmp(command, "cd") == 0) {
+					if(cmds[i]->length == 2) {
+						cd(cmds[i]->cmd[1]);
+					}
+					else if(cmds[i]->length == 1) {
+						cd(NULL);
+					}
+					else {
+						printf("Too many arguements for cd\n");
+					}
+				}
+				else if (strcmp(command, "jobs") == 0) {
+					//fill in when jobs is implemented
+				}
+				else if (strcmp(command, "echo") == 0) {
+					//fill in when jobs is implemented
+				}
+				else {
+					execv(cmds[0]->cmd[0], cmds[0]->cmd);
+					fprintf(stderr, "Problem executing %s\n", cmds[0]->cmd[0]);
+				}
+				exit(1);
+			}
+			else {
+				//parent(shell)
+				//do nothing, just loop again
+			}
+		}
+	}
 }
