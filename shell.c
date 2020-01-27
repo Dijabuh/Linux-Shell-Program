@@ -75,7 +75,7 @@ int main(){
 		int error = 0;
 		//Then check that there are not anymore & in the list of tokens
 		for(int i = 0; i < instr.numTokens; i++) {
-			if(instr.tokens[i] != NULL && strchr(instr.tokens[i], '&') != NULL) {
+			if(strchr(instr.tokens[i], '&') != NULL) {
 				fprintf(stderr, "Invalid user of & token\n");
 				clearInstruction(&instr);
 				error = 1;
@@ -83,6 +83,34 @@ int main(){
 		}
 
 		if(error) {
+			continue;
+		}
+
+		int piping = 0;
+		//Check if tokens has a |
+		//If so, run the piping execution function
+		for(int i = 0; i < instr.numTokens; i++) {
+			if(strchr(instr.tokens[i], '|') != NULL) {
+				//run piping function
+				piping = 1;
+			}
+		}
+
+		if(piping) {
+			continue;
+		}
+
+		int ioredir = 0;
+		//Check if tokens has a < or >
+		//If so, run the io redirection execution function
+		for(int i = 0; i < instr.numTokens; i++) {
+			if(strchr(instr.tokens[i], '<') != NULL || strchr(instr.tokens[i], '>') != NULL) {
+				//run io redirection function
+				ioredir = 1;
+			}
+		}
+
+		if(ioredir) {
 			continue;
 		}
 
