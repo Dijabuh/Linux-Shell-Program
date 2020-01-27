@@ -6,7 +6,7 @@ EXE = execution
 BUILTIN = builtins
 REDIRECT = redirection
 
-$(TARGET): $(TARGET).o parser.o file_res.o $(EXE).o $(BUILTIN).o $(REDIRECT).o
+$(TARGET): $(TARGET).o parser.o file_res.o $(EXE).o $(BUILTIN).o $(REDIRECT).o piping.o
 	$(CC) $^ -o $@ $(STND)
 
 $(TARGET).o: $(TARGET).c
@@ -26,6 +26,9 @@ $(BUILTIN).o: $(BUILTIN).c $(BUILTIN).h
 
 $(REDIRECT).o: $(REDIRECT).c $(REDIRECT).h
 	$(CC) -c $(REDIRECT).c -o $(REDIRECT).o $(STND)
+
+piping.o: piping.c
+	$(CC) -c piping.c -o piping.o $(STND)
 
 clean:
 	rm -rf *.o *~ $(TARGET)
