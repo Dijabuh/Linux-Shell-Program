@@ -18,49 +18,59 @@ void redirection(instruction* instr_ptr, bool background){
 	int file_desc2;
 
 	char** cmd;
-	char* file;
+	char* file = fget_first(instr_ptr->tokens, instr_ptr->numTokens);
 	char* file2;
 
 	if(redir_case == 0 || redir_case == 1){
 
-		fget_first(instr_ptr->tokens, instr_ptr->numTokens, file);
-	
-		if(access(file, F_OK) != -1)
+		if(access(file, F_OK) != -1 && redir_case == 0)
 			file_desc = open(file, O_RDONLY);
-		else{
+		else if(redir_case == 1){
+			// Opens a new file for output if non-existent
+			FILE* fp;
+			fp = fopen(file, "w+");
+			if(!fp){ fp = fopen(file, "w"); }
+			fclose(fp);
+
+			file_desc = open(file, O_WRONLY);
+		} else{
 			printf("Unable to open file %s\n", file);
+			free(file);
 			return;
 		}
-		
-		get_cmd(instr_ptr->tokens, instr_ptr->numTokens, cmd);
+	
+		get_cmd(instr_ptr);
 
-		single_redirection(cmd, file_desc, (
+		single_redirection(instr_ptr->tokens, file_desc, (
 			redir_case == 0 ? true : false), background);
 
 	} else if(redir_case == 2 || redir_case == 3){
 
-		fget_first(instr_ptr->tokens, instr_ptr->numTokens, file);
-		fget_last(instr_ptr->tokens, instr_ptr->numTokens, file2);
+		file2 = fget_last(instr_ptr->tokens, instr_ptr->numTokens);
 
 		if(access(file, F_OK) != -1)
 			file_desc = open(file, O_RDONLY);
 		else{
 			printf("Unable to open file %s\n", file);
+			free(file);
 			return;
 		}
 		if(access(file2, F_OK) != -1)
 			file_desc2 = open(file2, O_RDONLY);
 		else{
 			printf("Unable to open file %s\n", file2);
+			free(file);
+			free(file2);
 			return;
 		}
 
-		get_cmd(instr_ptr->tokens, instr_ptr->numTokens, cmd);
+		get_cmd(instr_ptr);
 
-		double_redirection(cmd, file_desc, file_desc2, (
+		double_redirection(instr_ptr->tokens, file_desc, file_desc2, (
 			redir_case == 2 ? true : false), background);
 	}
 
+	// If unable to open files, breaks to these
 	free(cmd);
 	free(file);
 	free(file2);
@@ -201,28 +211,34 @@ int parsing_rules(char** cmd, int tokens){
 	} else{ return -1; }
 }
 
-void get_cmd(char** tokens, int numTokens, char** cmd){
+void get_cmd(instruction* instr_ptr){
 
 	int end_cmd = -1;
 
-	for(int i = 0; i < numTokens; ++i){
+	for(int i = 0; i < instr_ptr->numTokens; ++i){
 		
-		if(strcmp(tokens[i], "<") == 0 || strcmp(tokens[i], ">") == 0){
+		if(strcmp(instr_ptr->tokens[i], "<") == 0 || strcmp(
+		instr_ptr->tokens[i], ">") == 0){
 			end_cmd = i;
 			break;
 		}
 	}
 
 	if(end_cmd == -1) return;
-	cmd = malloc(end_cmd * sizeof(char*));
 
-	for(int i = 0; i < end_cmd; ++i){
-		cmd[i] = malloc(sizeof(tokens[i]));
-		strcpy(cmd[i], tokens[i]);
+	for(int i = 0; i < instr_ptr->numTokens; ++i){
+		// Don't need to overwrite since cmd at front, need to cut off rest
+		if(i >= end_cmd)
+			free(instr_ptr->tokens[i]);
 	}
+	instr_ptr->numTokens = end_cmd;
+
+	for(int i = 0; i < instr_ptr->numTokens-1; ++i)
+		printf(instr_ptr->tokens[i]);
+	printf("%s\n", instr_ptr->tokens[instr_ptr->numTokens-1]);
 }
 
-void fget_first(char** tokens, int numTokens, char* file){
+char* fget_first(char** tokens, int numTokens){
 	
 	int i;
 
@@ -231,11 +247,12 @@ void fget_first(char** tokens, int numTokens, char* file){
 			break;
 	}
 	
-	file = (char*) malloc(sizeof(tokens[i+1]));
+	char* file = (char*) malloc(sizeof(tokens[i+1]));
 	strcpy(file, tokens[i+1]);
+	return file;
 }
 
-void fget_last(char** tokens, int numTokens, char* file){
+char* fget_last(char** tokens, int numTokens){
 
 	bool firstRedir = false;
 	int i;
@@ -250,6 +267,7 @@ void fget_last(char** tokens, int numTokens, char* file){
 		}
 	}
 	
-	file = (char*) malloc(sizeof(tokens[i+1]));
+	char* file = (char*) malloc(sizeof(tokens[i+1]));
 	strcpy(file, tokens[i+1]);
+	return file;
 }

@@ -20,10 +20,11 @@ int parsing_rules(char** cmd, int tokens);
  *  3 = cmd > file < file
 */
 
-void get_cmd(char** tokens, int numTokens, char** cmd);
+// Overrides tokens and numTokens with cmd and number of command tokens
+void get_cmd(instruction* instr_ptr);
 
 // Gets first file in tokens
-void fget_first(char** tokens, int numTokens, char* file);
+char* fget_first(char** tokens, int numTokens);
 
 // Gets last file in tokens, only for double redirection
-void fget_last(char** tokens, int numTokens, char* file);
+char* fget_last(char** tokens, int numTokens);
