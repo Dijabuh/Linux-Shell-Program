@@ -150,22 +150,21 @@ int main(){
 		//need to switch from using instr.tokens[0] to a char*
 		//instr.tokens[0] could be an &
 		else if(isPath(command)){
-			printf("Is a path\n");
 			char* path = getAbsPathname(command);
 			printf("%s\n", path);
 			if(access(path, F_OK) == 0) {
-				printf("Full path: %s\n", path);
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;
 				execute(instr.tokens);	
 				numInstructionsRun++;
 			}
+			else {
+				printf("Command not found\n");
+			}
 		}
 		else {
-			printf("Is a command\n");
 			char* path = getPath(command);
 			if (path != NULL) {
-				printf("Full path: %s\n", path);
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;
 				execute(instr.tokens);	
