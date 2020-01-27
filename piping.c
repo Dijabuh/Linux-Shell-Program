@@ -28,19 +28,19 @@ int pipeParser(instruction* instr, int bg) {
 		}
 		else if(infound && strcmp(instr->tokens[i], "<") == 0) {
 			//error, no more than 1 io redirection in
-			fprintf(stderr, "2Invalid use of < token\n");
+			fprintf(stderr, "Invalid use of < token\n");
 			free(filein);
 			return -1;
 		}
 		else if(!infound && strcmp(instr->tokens[i], "<") == 0) {
 			if(i == 0) {
 				//error, < cant be first token
-				fprintf(stderr, "3Invalid use of < token\n");
+				fprintf(stderr, "Invalid use of < token\n");
 				return -1;
 			}
 			if(pipefound) {
 				//error, io in must be before first pipe
-				fprintf(stderr, "1Invalid use of < token\n");
+				fprintf(stderr, "Invalid use of < token\n");
 				return -1;
 			}
 			//check if 2 tokens ahead is a pipe
@@ -55,7 +55,7 @@ int pipeParser(instruction* instr, int bg) {
 			}
 			else {
 				//error, can only be 1 token between < and pipe
-				fprintf(stderr, "1Invalid use of < token\n");
+				fprintf(stderr, "Invalid use of < token\n");
 				return -1;
 			}
 		}
@@ -109,25 +109,25 @@ int pipeParser(instruction* instr, int bg) {
 			strcpy(temp->cmd[0], instr->tokens[i]);
 		}
 		else if(strcmp(instr->tokens[i], "<") == 0 || strcmp(instr->tokens[i], ">") == 0 || strcmp(instr->tokens[i], "|") == 0) {
-			//make sure this isnt the last token
-			if(i == instr->numTokens - 1) {
-				//error, last token cant be < > or |
-				fprintf(stderr, "Invalid use of %s token\n", instr->tokens[i]);
-				//need to free up cmds and temp
-				return -1;
+			if(temp != NULL) {
+				//make sure this isnt the last token
+				if(i == instr->numTokens - 1) {
+					//error, last token cant be < > or |
+					fprintf(stderr, "Invalid use of %s token\n", instr->tokens[i]);
+					//need to free up cmds and temp
+					return -1;
+				}
+				//otherwise, add current temp to cmds and start a new one
+				cmds = (pipecmd**) realloc(cmds, (numCmds + 1) * sizeof(pipecmd*));
+				cmds[numCmds] = temp;
+				numCmds++;
+
+				temp = NULL;
 			}
-			//otherwise, add current temp to cmds and start a new one
-			cmds = (pipecmd**) realloc(cmds, (numCmds + 1) * sizeof(pipecmd*));
-			cmds[numCmds] = temp;
-			numCmds++;
-
-			//start new pipecmd
-			temp = (pipecmd*) malloc(sizeof(pipecmd));
-			temp->length = 1;
-			temp->fdin = 0;
-			temp->fdout = 0;
-
-			temp = NULL;
+			//if < or >, skip next token
+			if(strcmp(instr->tokens[i], "<") == 0 || strcmp(instr->tokens[i], ">") == 0) {
+				i++;
+			}
 		}
 		else if (i == instr->numTokens - 1) {
 			//if we are on the last token, add it to temp
