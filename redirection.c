@@ -6,31 +6,59 @@
 #include "redirection.h"
 #include "execution.h"
 
-void redirection(instruction* instr_ptr){
+void redirection(instruction* instr_ptr, bool background){
 
-	// if(!parsing_rules(instr_ptr->cmds, tokens)){ return; } // Failed parsing rules
+	// Returns if failed parsing rules
+	int redir_case = parsing_rules(instr_ptr->tokens, instr_ptr->numTokens);
+	if(redir_case == -1){ return; } // violation of redirection rules
 
-	/*
-	bool input_redir = (redirection_symbol == '<');
 	int file_desc;
+	int file_desc2;
+	char* file = '\0';
+	char* file2 = '\0';
 
-	if(input_redir){
-		if(access(f_input, F_OK) != -1)
-			file_desc = open(f_input, O_RDONLY);
-		else
-			printf("Unable to open file %s\n", f_input);
-	} else
-		file_desc = open(f_input, O_WRONLY);
+	if(redir_case == 0 || redir_case == 1){
 
-	link_cmd_path(cmd, file_desc, input_redir);
-	*/
+		// set file to file path
+	
+		if(access(file, F_OK) != -1)
+			file_desc = open(file, O_RDONLY);
+		else{
+			printf("Unable to open file %s\n", file);
+			return;
+		}
+
+		single_redirection(instr_ptr->tokens, file_desc, (
+			redir_case == 0 ? true : false), background);
+
+	} else if(redir_case == 2 || redir_case == 3){
+
+		// set file and file2 to paths
+
+		if(access(file, F_OK) != -1)
+			file_desc = open(file, O_RDONLY);
+		else{
+			printf("Unable to open file %s\n", file);
+			return;
+		}
+		if(access(file2, F_OK) != -1)
+			file_desc2 = open(file2, O_RDONLY);
+		else{
+			printf("Unable to open file %s\n", file2);
+			return;
+		}
+
+		double_redirection(instr_ptr->tokens, file_desc, file_desc2, (
+			redir_case == 2 ? true : false), background);
+	}
 }
 
-void link_cmd_path(char** cmd, int file_desc, bool io_dir){
+void single_redirection(char** cmd, int file_desc,
+bool direction, bool background){
 
 	if(fork() == 0){
 		
-		if(io_dir)
+		if(direction)
 			close(STDIN_FILENO);
 		else
 			close(STDOUT_FILENO);
@@ -39,12 +67,49 @@ void link_cmd_path(char** cmd, int file_desc, bool io_dir){
 		close(file_desc);
 		
 		// Execute process here
-		execute(cmd);
+		if(!background)
+			execute(cmd);
+		else
+			execute_bckgrnd(cmd);
 	} else{
 		// Parent?
 		close(file_desc);
 	}
 }
+
+void double_redirection(char** cmd, int file_desc1,
+int file_desc2, bool direction, bool background){
+	
+	if(fork() == 0){
+		
+		if(direction){
+			close(STDIN_FILENO);
+			dup(file_desc1);
+			close(file_desc1);
+			close(STDOUT_FILENO);
+			dup(file_desc2);
+			close(file_desc2);
+		} else{
+			close(STDOUT_FILENO);
+			dup(file_desc1);
+			close(file_desc1);
+			close(STDIN_FILENO);
+			dup(file_desc2);
+			close(file_desc2);
+		}
+
+		// Execute process here
+		if(!background)
+			execute(cmd);
+		else
+			execute_bckgrnd(cmd);
+	} else{
+		// Parent?
+		close(file_desc1);
+		close(file_desc2);
+	}
+}
+
 
 int parsing_rules(char** cmd, int tokens){
 	
