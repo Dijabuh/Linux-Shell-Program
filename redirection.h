@@ -1,6 +1,8 @@
 #include <stdbool.h>
 
-void redirection(char** cmd, int tokens);
+#include "parser.h"
+
+void redirection(instruction* instr_ptr);
 
 void link_cmd_path(char** cmd, int file_desc, bool io_dir);
 

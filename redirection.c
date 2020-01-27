@@ -1,13 +1,14 @@
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "redirection.h"
 #include "execution.h"
 
-void redirection(char** cmd, int tokens){
+void redirection(instruction* instr_ptr){
 
-	if(!parsing_rules(cmd, tokens)){ return; } // Failed parsing rules
+	// if(!parsing_rules(instr_ptr->cmds, tokens)){ return; } // Failed parsing rules
 
 	/*
 	bool input_redir = (redirection_symbol == '<');
@@ -55,7 +56,11 @@ int parsing_rules(char** cmd, int tokens){
 	 5. Must alternate <>'s and cmds
 	*/
 
-	int cmd_counter = redir_counter = 0;
+	int cmd_counter = 0;
+	int redir_counter = 0;
+
+	char input[] = "<";
+	char output[] = ">";
 	
 	// Tracks if on cmd/<> for rule 5
 	bool alt = true;	// true = don't accept <>
@@ -64,24 +69,30 @@ int parsing_rules(char** cmd, int tokens){
 	int multi_redir = -1; // -1=none, 0=<, 1=>
 
 	// Checks for rule 4
-	if(cmd[0] == '<' || cmd[0] == '>')
+	if(strcmp(cmd[0], input) == 0 || strcmp(cmd[0], output) == 0)
 		return -1;
 
 	for(int i = 0; i < tokens; ++i){
 		
-		if(cmd[i] == '<' || cmd[i] == '>'){
+		if(strcmp(cmd[i], input) == 0 || strcmp(cmd[i], output) == 0){
 			// Checks for rule 2
 			if(redir_counter > 1){ return -1; }
 
 			if(!alt){
 				// Checks for rule 3
 				if(multi_redir == 0)
-					if(cmd[i] == '<'){ return -1; }
-				else if(mutli_redir == 1)
-					if(cmd[i] == '>'){ return -1; }
+					if(strcmp(cmd[i], input) == 0){ 
+						return -1; 
+					}
+				else if(multi_redir == 1)
+					if(strcmp(cmd[i], output) == 0){ 
+						return -1;
+					}
 				else{
 					// Sets which <> called
-					if(cmd[i] == '<'){ multi_redir = 0; }
+					if(strcmp(cmd[i], input) == 0){
+						multi_redir = 0;
+					}
 					else{ multi_redir = 1; }
 				}
 
