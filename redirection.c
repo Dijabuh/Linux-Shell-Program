@@ -17,9 +17,9 @@ void redirection(instruction* instr_ptr, bool background){
 	int file_desc;
 	int file_desc2;
 
-	char** cmd;
+	char** cmd = NULL;
 	char* file = fget_first(instr_ptr->tokens, instr_ptr->numTokens);
-	char* file2;
+	char* file2 = NULL;
 
 	if(redir_case == 0 || redir_case == 1){
 
@@ -27,11 +27,11 @@ void redirection(instruction* instr_ptr, bool background){
 			file_desc = open(file, O_RDONLY);
 		else if(redir_case == 1){
 			// Opens a new file for output if non-existent
-			FILE* fp;
-			fp = fopen(file, "w+");
-			if(!fp){ fp = fopen(file, "w"); }
-			fclose(fp);
+			if(access(file, F_OK) != -1)
+				remove(file);
 
+			FILE* fp = fopen(file, "w");
+			fclose(fp);
 			file_desc = open(file, O_WRONLY);
 		} else{
 			printf("Unable to open file %s\n", file);
@@ -71,9 +71,18 @@ void redirection(instruction* instr_ptr, bool background){
 	}
 
 	// If unable to open files, breaks to these
-	free(cmd);
-	free(file);
-	free(file2);
+	if(cmd != NULL){
+		free(cmd);
+		cmd = NULL;
+	}
+	if(file != NULL){
+		free(file);
+		file = NULL;
+	}
+	if(file2 != NULL){
+		free(file2);
+		file2 = NULL;
+	}
 }
 
 void single_redirection(char** cmd, int file_desc,
