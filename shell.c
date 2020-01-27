@@ -187,9 +187,7 @@ int main(){
 			}
 		}
 		else {
-			printf("%s\n", command);
 			char* path = getPath(command);
-			printf("here\n");
 			if (path != NULL) {
 				free(instr.tokens[0]);
 				instr.tokens[0] = path;
