@@ -79,7 +79,7 @@ void checkProcesses(processes* proc) {
 			printf("[%i]+ [%s]\n", proc->pids[i], proc->cmds[i]);
 
 			//remove it from queue
-			processes* temp;
+			processes* temp = (processes*) malloc(sizeof(processes));;
 			if(proc->length > 1) {
 				temp->pids = (int*) malloc((proc->length - 1) * sizeof(int));
 				temp->cmds = (char**) malloc((proc->length - 1) * sizeof(char*));
