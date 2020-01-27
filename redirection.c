@@ -1,10 +1,12 @@
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "redirection.h"
 #include "execution.h"
+#include "file_res.h"
+#include "redirection.h"
 
 void redirection(instruction* instr_ptr, bool background){
 
@@ -19,7 +21,7 @@ void redirection(instruction* instr_ptr, bool background){
 
 	if(redir_case == 0 || redir_case == 1){
 
-		// set file to file path
+		strcpy(file, fget_first(instr_ptr->tokens, instr_ptr->numTokens));
 	
 		if(access(file, F_OK) != -1)
 			file_desc = open(file, O_RDONLY);
@@ -27,13 +29,17 @@ void redirection(instruction* instr_ptr, bool background){
 			printf("Unable to open file %s\n", file);
 			return;
 		}
+		
+		char** cmd = get_cmd(instr_ptr->tokens, instr_ptr->numTokens);
 
-		single_redirection(instr_ptr->tokens, file_desc, (
+		single_redirection(cmd, file_desc, (
 			redir_case == 0 ? true : false), background);
+		free(cmd);
 
 	} else if(redir_case == 2 || redir_case == 3){
 
-		// set file and file2 to paths
+		strcpy(file, fget_first(instr_ptr->tokens, instr_ptr->numTokens));
+		strcpy(file2, fget_last(instr_ptr->tokens, instr_ptr->numTokens));
 
 		if(access(file, F_OK) != -1)
 			file_desc = open(file, O_RDONLY);
@@ -48,8 +54,11 @@ void redirection(instruction* instr_ptr, bool background){
 			return;
 		}
 
-		double_redirection(instr_ptr->tokens, file_desc, file_desc2, (
+		char** cmd = get_cmd(instr_ptr->tokens, instr_ptr->numTokens);
+
+		double_redirection(cmd, file_desc, file_desc2, (
 			redir_case == 2 ? true : false), background);
+		free(cmd);
 	}
 }
 
@@ -186,4 +195,52 @@ int parsing_rules(char** cmd, int tokens){
 		else if(multi_redir == 1){ return 3; }
 		else{ return -1; }
 	} else{ return -1; }
+}
+
+char** get_cmd(char** tokens, int numTokens){
+
+	int end_cmd;
+
+	for(int i = 0; i < numTokens; ++i){
+		
+		if(strcmp(tokens[i], "<") == 0 || strcmp(tokens[i], ">") == 0)
+			end_cmd = i;
+	}
+
+	int size_cmd = 0;
+	char** cmd;
+
+	for(int i = 0; i < end_cmd; ++i){
+		size_cmd += sizeof(tokens[i]);
+	}
+
+	cmd = (char**)malloc(size_cmd);
+	for(int i = 0; i < end_cmd; ++i){
+		strcpy(cmd[i], tokens[i]);
+	}
+
+	return cmd;
+}
+
+char* fget_first(char** tokens, int numTokens){
+	
+	for(int i = 0; i < numTokens; ++i){
+		if(strcmp(tokens[i], "<") == 0 || strcmp(tokens[i], ">") == 0)
+			return tokens[i+1];
+	}
+}
+
+char* fget_last(char** tokens, int numTokens){
+
+	bool firstRedir = false;
+
+	for(int i = 0; i < numTokens; ++i){
+		
+		if(strcmp(tokens[i], "<") == 0 || strcmp(tokens[i], ">") == 0){
+			if(firstRedir)
+				return tokens[i+1];
+			else
+				firstRedir = true;
+		}
+	}
 }

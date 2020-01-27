@@ -5,6 +5,7 @@
 #include "file_res.h"
 #include "builtins.h"
 #include "execution.h"
+#include "redirection.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -111,7 +112,7 @@ int main(){
 		}
 
 		if(ioredir) {
-			continue;
+			// redirection(&instr, backgroundexec);
 		}
 
 		//add in null to end of tokens

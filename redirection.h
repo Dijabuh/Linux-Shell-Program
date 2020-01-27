@@ -19,3 +19,11 @@ int parsing_rules(char** cmd, int tokens);
  *  2 = cmd < file > file
  *  3 = cmd > file < file
 */
+
+char** get_cmd(char** tokens, int numTokens);
+
+// Gets first file in tokens
+char* fget_first(char** tokens, int numTokens);
+
+// Gets last file in tokens
+char* fget_last(char** tokens, int numTokens); // only for double redirection
