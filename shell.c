@@ -97,6 +97,7 @@ int main(){
 				piping = 1;
 				int pid = 0;
 				pid = pipeParser(&instr, backgroundexec);
+				numInstructionsRun++;
 				break;
 			}
 		}
