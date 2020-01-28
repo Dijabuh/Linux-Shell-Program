@@ -256,22 +256,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				//execute command
 				char* command = cmds[i]->cmd[0];
 				//check if command is one of the builtins
-				if(strcmp(command, "exit") == 0) {
-					//need to pass num instructions run somehow
-					EXIT(0);
-				}
-				else if (strcmp(command, "cd") == 0) {
-					if(cmds[i]->length == 2) {
-						cd(cmds[i]->cmd[1]);
-					}
-					else if(cmds[i]->length == 1) {
-						cd(NULL);
-					}
-					else {
-						printf("Too many arguements for cd\n");
-					}
-				}
-				else if (strcmp(command, "jobs") == 0) {
+				if (strcmp(command, "jobs") == 0) {
 					//fill in when jobs is implemented
 				}
 				else if (strcmp(command, "echo") == 0) {
@@ -312,22 +297,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				//execute command
 				char* command = cmds[i]->cmd[0];
 				//check if command is one of the builtins
-				if(strcmp(command, "exit") == 0) {
-					//need to pass num instructions run somehow
-					EXIT(0);
-				}
-				else if (strcmp(command, "cd") == 0) {
-					if(cmds[i]->length == 2) {
-						cd(cmds[i]->cmd[1]);
-					}
-					else if(cmds[i]->length == 1) {
-						cd(NULL);
-					}
-					else {
-						printf("Too many arguements for cd\n");
-					}
-				}
-				else if (strcmp(command, "jobs") == 0) {
+				if (strcmp(command, "jobs") == 0) {
 					//fill in when jobs is implemented
 				}
 				else if (strcmp(command, "echo") == 0) {
@@ -375,22 +345,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				//execute command
 				char* command = cmds[i]->cmd[0];
 				//check if command is one of the builtins
-				if(strcmp(command, "exit") == 0) {
-					//need to pass num instructions run somehow
-					EXIT(0);
-				}
-				else if (strcmp(command, "cd") == 0) {
-					if(cmds[i]->length == 2) {
-						cd(cmds[i]->cmd[1]);
-					}
-					else if(cmds[i]->length == 1) {
-						cd(NULL);
-					}
-					else {
-						printf("Too many arguements for cd\n");
-					}
-				}
-				else if (strcmp(command, "jobs") == 0) {
+				if (strcmp(command, "jobs") == 0) {
 					//fill in when jobs is implemented
 				}
 				else if (strcmp(command, "echo") == 0) {

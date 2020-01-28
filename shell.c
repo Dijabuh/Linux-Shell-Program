@@ -32,15 +32,6 @@ int main(){
 
 		getTokens(&instr);
 
-		//used for keeping track of the full instruction for background processes
-		instruction instrbg;
-		instrbg.numTokens = instr.numTokens;
-		instrbg.tokens = (char**) malloc(instr.numTokens * sizeof(char*));
-		for(int i = 0; i < instr.numTokens; i++) {
-			instrbg.tokens[i] = (char*) malloc((strlen(instr.tokens[i]) + 1) * sizeof(char));
-			strcpy(instrbg.tokens[i], instr.tokens[i]);
-		}
-
 		//order of executing
 		//Remove beggining & if it exists
 		//Remove trailing & if it exists and flag for background execution
@@ -111,6 +102,10 @@ int main(){
 				piping = 1;
 				int pid = 0;
 				pid = pipeParser(&instr, backgroundexec);
+				if(pid != -1) {
+					addNull(&instr);
+					addProcess(&procs, pid, &instr);
+				}
 				numInstructionsRun++;
 				break;
 			}
@@ -180,7 +175,7 @@ int main(){
 				instr.tokens[0] = path;
 				if(backgroundexec) {
 					int pid = execute_bckgrnd(instr.tokens);	
-					addProcess(&procs, pid, &instrbg);
+					addProcess(&procs, pid, &instr);
 				}
 				else {
 					execute(instr.tokens);	
@@ -198,7 +193,7 @@ int main(){
 				instr.tokens[0] = path;
 				if(backgroundexec) {
 					int pid = execute_bckgrnd(instr.tokens);	
-					addProcess(&procs, pid, &instrbg);
+					addProcess(&procs, pid, &instr);
 				}
 				else {
 					execute(instr.tokens);	
