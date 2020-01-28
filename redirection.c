@@ -116,12 +116,14 @@ bool direction, bool background){
 					break;
 			}
 			printf("%d\n", r);
-			echo(cmd, r); 	
+			echo(cmd, r);
+				
 		} else{
 			execv(cmd[0], cmd);
 			printf("Problem executing %s\n", cmd[0]);
 			return -1;
 		}
+		exit(1);
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
