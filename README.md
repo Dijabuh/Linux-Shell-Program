@@ -28,6 +28,7 @@ COP4610 Project 1: Implementing a Shell
 - readme (title, group members, this)
 - external execution of commands
 - IO redirection
+- Makefile package and variables
 ##### Daniel Division of Labor
 - Parsing
 - Resolving Path Shortcuts
