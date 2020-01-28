@@ -64,3 +64,10 @@ COP4610 Project 1: Implementing a Shell
 - Piping commands
 - Background execution
 - Builtins
+
+### Known Bugs
+We do now know of any bugs with the shell at this time, and all parts of the project are completed
+
+### Extra Credit
+For extra credit, our program can handle multiple pipes, and io redirection, all within the same call
+Our shell can also run inside of itself
