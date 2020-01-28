@@ -143,7 +143,7 @@ int main(){
 
 		//check if command is one of the builtins
 		if(strcmp(command, "exit") == 0) {
-			EXIT(numInstructionsRun);
+			EXIT(numInstructionsRun, &procs);
 		}
 		else if (strcmp(command, "cd") == 0) {
 			if(instr.numTokens == 2) {

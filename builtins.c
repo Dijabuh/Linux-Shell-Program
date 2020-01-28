@@ -9,7 +9,14 @@
 #include "file_res.h"
 #include "background.h"
 
-void EXIT(int commands){
+void EXIT(int commands, processes* procs){
+
+	if(procs->length > 0) {
+		printf("Waiting for background processes to finish\n");
+		while(procs->length > 0) {
+			checkProcesses(procs);
+		}
+	}
 
 	printf("Exiting now! Executed %d commands!\n", commands);
 
