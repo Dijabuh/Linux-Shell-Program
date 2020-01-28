@@ -175,23 +175,30 @@ int parsing_rules(char** cmd, int tokens){
 	int multi_redir = -1; // -1=none, 0=<, 1=>
 
 	// Checks for rule 4
-	if(strcmp(cmd[0], input) == 0 || strcmp(cmd[0], output) == 0)
+	if(strcmp(cmd[0], input) == 0 || strcmp(cmd[0], output) == 0){
+		printf("Invalid null command.\n");
 		return -1;
+	}
 
 	for(int i = 0; i < tokens; ++i){
 		
 		if(strcmp(cmd[i], input) == 0 || strcmp(cmd[i], output) == 0){
 			// Checks for rule 2
-			if(redir_counter > 1){ return -1; }
+			if(redir_counter > 1){
+				printf("Ambiguous redirect.\n");
+				return -1;
+			}
 
 			if(!alt){
 				// Checks for rule 3
 				if(multi_redir == 0){
-					if(strcmp(cmd[i], input) == 0){ 
+					if(strcmp(cmd[i], input) == 0){
+						printf("Ambiguous input redirect.\n");
 						return -1; 
 					}
 				} else if(multi_redir == 1){
 					if(strcmp(cmd[i], output) == 0){ 
+						printf("Ambiguous output redirect.\n");
 						return -1;
 					}
 				} else{
@@ -207,6 +214,7 @@ int parsing_rules(char** cmd, int tokens){
 				// Here bc cmd may have flags/args after
 				++cmd_counter;
 			} else{
+				printf("Missing name for redirect.\n");
 				return -1; // violates 5
 			}
 		} else{
@@ -216,9 +224,15 @@ int parsing_rules(char** cmd, int tokens){
 
 	// Checking if ended with command string
 	if(!alt){ ++cmd_counter; }
-	else{ return -1; } // violates 4
+	else{
+		printf("Missing name for redirect.\n");
+		return -1; 
+	} // violates 4
 
-	if(redir_counter + 1 != cmd_counter){ return -1; } // violates 1
+	if(redir_counter + 1 != cmd_counter){
+		printf("Amiguous redirect.\n");	
+		return -1; 
+	} // violates 1
 
 	if(redir_counter == 1){ return multi_redir; } // returns < or >
 	else if(redir_counter == 2){
