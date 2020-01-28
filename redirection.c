@@ -174,6 +174,7 @@ int file_desc2, bool direction, bool background){
 			printf("Problem executing %s\n", cmd[0]);
 			return -1;
 		}
+		exit(1);
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
