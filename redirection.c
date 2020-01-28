@@ -41,9 +41,9 @@ void redirection(instruction* instr_ptr, bool background){
 			return;
 		}
 	
-		get_cmd(instr_ptr);
+		cmd = get_cmd(instr_ptr);
 
-		single_redirection(instr_ptr->tokens, file_desc, (
+		single_redirection(cmd, file_desc, (
 			redir_case == 0 ? true : false), background);
 
 	} else if(redir_case == 2 || redir_case == 3){
@@ -55,6 +55,7 @@ void redirection(instruction* instr_ptr, bool background){
 		else{
 			printf("Unable to open file %s\n", file);
 			free(file);
+			free(file2);
 			return;
 		}
 		if(access(file2, F_OK) != -1)
@@ -66,25 +67,13 @@ void redirection(instruction* instr_ptr, bool background){
 			return;
 		}
 
-		get_cmd(instr_ptr);
+		cmd = get_cmd(instr_ptr);
 
-		double_redirection(instr_ptr->tokens, file_desc, file_desc2, (
+		double_redirection(cmd, file_desc, file_desc2, (
 			redir_case == 2 ? true : false), background);
 	}
 
-	// If unable to open files, breaks to these
-	if(cmd != NULL){
-		free(cmd);
-		cmd = NULL;
-	}
-	if(file != NULL){
-		free(file);
-		file = NULL;
-	}
-	if(file2 != NULL){
-		free(file2);
-		file2 = NULL;
-	}
+	free(cmd);
 }
 
 void single_redirection(char** cmd, int file_desc,
@@ -234,7 +223,7 @@ int parsing_rules(char** cmd, int tokens){
 	} else{ return -1; }
 }
 
-void get_cmd(instruction* instr_ptr){
+char** get_cmd(instruction* instr_ptr){
 
 	int end_cmd = -1;
 
@@ -247,21 +236,23 @@ void get_cmd(instruction* instr_ptr){
 		}
 	}
 
-	if(end_cmd == -1) return;
+	if(end_cmd == -1) return NULL;
 	
-	instr_ptr->numTokens = end_cmd;
-	instr_ptr->tokens = realloc(instr_ptr->tokens, instr_ptr->numTokens+1 * sizeof(*instr_ptr->tokens));
-	instr_ptr->tokens[instr_ptr->numTokens] = NULL;
-
-	char* path = getPath(instr_ptr->tokens[0]);
-	if (path != NULL){
-		free(instr_ptr->tokens[0]);
-		instr_ptr->tokens[0] = path;
+	char** cmd = (char**) malloc(sizeof(char*) * (end_cmd+1));
+	for(int i = 0; i < end_cmd; ++i){
+		cmd[i] = (char*) malloc((strlen(instr_ptr->tokens[i]) + 1) * sizeof(char));
+		strcpy(cmd[i], instr_ptr->tokens[i]);
 	}
+	cmd[end_cmd] = NULL;
+	
+	char* path = getPath(cmd[0]);
+	if (path != NULL){
+		free(cmd[0]);
+		cmd[0] = path;
+	} else
+		return NULL;
 
-	for(int i = 0; i < instr_ptr->numTokens; ++i)
-		printf("%s\n", instr_ptr->tokens[i]);
-	if(instr_ptr->tokens[instr_ptr->numTokens] == NULL) printf("TERM\n");
+	return cmd;
 }
 
 char* fget_first(char** tokens, int numTokens){

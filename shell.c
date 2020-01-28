@@ -127,7 +127,7 @@ int main(){
 		for(int i = 0; i < instr.numTokens; i++) {
 			if(strchr(instr.tokens[i], '<') != NULL || strchr(instr.tokens[i], '>') != NULL) {
 				//run io redirection function
-				// redirection(&instr, backgroundexec);
+				redirection(&instr, backgroundexec);
 				ioredir = 1;
 				break;
 			}

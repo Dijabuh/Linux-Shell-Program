@@ -21,7 +21,7 @@ int parsing_rules(char** cmd, int tokens);
 */
 
 // Overrides tokens and numTokens with cmd and number of command tokens
-void get_cmd(instruction* instr_ptr);
+char** get_cmd(instruction* instr_ptr);
 
 // Gets first file in tokens
 char* fget_first(char** tokens, int numTokens);
