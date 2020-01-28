@@ -61,3 +61,6 @@ COP4610 Project 1: Implementing a Shell
 - Parsing
 - Resolving Path Shortcuts
 - User Prompt
+- Piping commands
+- Background execution
+- Builtins
