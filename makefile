@@ -47,4 +47,5 @@ clean:
 package:
 	rm -rf *.o *~ $(TARGET)
 	make
-	tar -cvf project1_anderson_brown.tar $(TARGET).c $(HEADERS) $(IMPLMNT) $(SUPPORT)
+	git log > commit_log.txt
+	tar -cvf project1_anderson_brown.tar $(TARGET).c $(HEADERS) $(IMPLMNT) $(SUPPORT) commit_log.txt
