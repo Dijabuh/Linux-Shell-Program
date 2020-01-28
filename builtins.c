@@ -7,6 +7,7 @@
 
 #include "builtins.h"
 #include "file_res.h"
+#include "background.h"
 
 void EXIT(int commands){
 
@@ -57,4 +58,10 @@ void echo(char** args, int length) {
 		}
 	}
 	printf("\n");
+}
+
+void jobs(processes* procs) {
+ for(int i = 0; i < procs->length; i++) {
+		printf("[%i]+ [%i] [%s]\n", i, procs->pids[i], procs->cmds[i]);
+ }
 }

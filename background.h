@@ -1,3 +1,5 @@
+#ifndef _BACKGROUND_H
+#define _BACKGROUND_H
 #include "parser.h"
 
 typedef struct {
@@ -8,3 +10,5 @@ typedef struct {
 
 void addProcess(processes* proc, int pid, instruction* instr);
 void checkProcesses(processes* proc);
+
+#endif

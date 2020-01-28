@@ -101,7 +101,7 @@ int main(){
 				//run piping function
 				piping = 1;
 				int pid = 0;
-				pid = pipeParser(&instr, backgroundexec);
+				pid = pipeParser(&instr, backgroundexec, &procs);
 				if(pid != -1) {
 					addNull(&instr);
 					addProcess(&procs, pid, &instr);
@@ -159,6 +159,7 @@ int main(){
 			}
 		}
 		else if (strcmp(command, "jobs") == 0) {
+			jobs(&procs);
 			numInstructionsRun++;
 		}
 		else if (strcmp(command, "echo") == 0) {

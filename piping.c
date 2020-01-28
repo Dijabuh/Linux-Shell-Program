@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-int pipeParser(instruction* instr, int bg) {
+int pipeParser(instruction* instr, int bg, processes* procs) {
 	int numPipes = 0;
 	//first get number of pipes
 	for(int i = 0; i < instr->numTokens; i++) {
@@ -230,10 +230,10 @@ int pipeParser(instruction* instr, int bg) {
 		cmds[i]->length++;
 	}
 	//run the pipe execution function and return its return value
-	return pipeExec(cmds, numCmds, filein, fileout, bg); 
+	return pipeExec(cmds, numCmds, filein, fileout, bg, procs); 
 }
 
-int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
+int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg, processes* procs) {
 	for(int i = 0; i < length; i++) {
 		if(i == 0) {
 			//first command
@@ -257,7 +257,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				char* command = cmds[i]->cmd[0];
 				//check if command is one of the builtins
 				if (strcmp(command, "jobs") == 0) {
-					//fill in when jobs is implemented
+					jobs(procs);
 				}
 				else if (strcmp(command, "echo") == 0) {
 					cmds[i]->cmd[0] = NULL;
@@ -299,7 +299,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				char* command = cmds[i]->cmd[0];
 				//check if command is one of the builtins
 				if (strcmp(command, "jobs") == 0) {
-					//fill in when jobs is implemented
+					jobs(procs);
 				}
 				else if (strcmp(command, "echo") == 0) {
 					cmds[i]->cmd[0] = NULL;
@@ -348,7 +348,7 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 				char* command = cmds[i]->cmd[0];
 				//check if command is one of the builtins
 				if (strcmp(command, "jobs") == 0) {
-					//fill in when jobs is implemented
+					jobs(procs);
 				}
 				else if (strcmp(command, "echo") == 0) {
 					cmds[i]->cmd[0] = NULL;
