@@ -10,11 +10,13 @@
 #include "file_res.h"
 #include "redirection.h"
 
-void redirection(instruction* instr_ptr, bool background){
+int redirection(instruction* instr_ptr, bool background){
 
+	int no_bckgrnd = -1;
+	int pid;
 	// Returns if failed parsing rules
 	int redir_case = parsing_rules(instr_ptr->tokens, instr_ptr->numTokens);
-	if(redir_case == -1){ return; } // violation of redirection rules
+	if(redir_case == -1){ return no_bckgrnd; } // violation of redirection rules
 
 	int file_desc;
 	int file_desc2;
@@ -37,12 +39,12 @@ void redirection(instruction* instr_ptr, bool background){
 		} else{
 			printf("Unable to open file %s\n", file);
 			free(file);
-			return;
+			return no_bckgrnd;
 		}
 	
 		cmd = get_cmd(instr_ptr);
 
-		single_redirection(cmd, file_desc, (
+		pid = single_redirection(cmd, file_desc, (
 			redir_case == 0 ? true : false), background);
 
 	} else if(redir_case == 2 || redir_case == 3){
@@ -71,24 +73,27 @@ void redirection(instruction* instr_ptr, bool background){
 			printf("Unable to open file %s\n", file);
 			free(file);
 			free(file2);
-			return;
+			return no_bckgrnd;
 		}
 		cmd = get_cmd(instr_ptr);
 
-		double_redirection(cmd, file_desc, file_desc2, (
+		pid = double_redirection(cmd, file_desc, file_desc2, (
 			redir_case == 2 ? true : false), background);
 	}
 
 	free(cmd);
+	if(background)
+		return pid;
+	return no_bckgrnd;
 }
 
-void single_redirection(char** cmd, int file_desc,
+int single_redirection(char** cmd, int file_desc,
 bool direction, bool background){
 
 	int status;
 	pid_t pid = fork();
 
-	if(pid == -1) return;
+	if(pid == -1) return pid;
 	else if(pid == 0){
 		
 		if(direction)
@@ -101,7 +106,7 @@ bool direction, bool background){
 			
 		execv(cmd[0], cmd);
 		printf("Problem executing %s\n", cmd[0]);
-		return;
+		return -1;
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
@@ -110,15 +115,16 @@ bool direction, bool background){
 		
 		close(file_desc);
 	}
+	return pid;
 }
 
-void double_redirection(char** cmd, int file_desc1,
+int double_redirection(char** cmd, int file_desc1,
 int file_desc2, bool direction, bool background){
 
 	int status;
 	pid_t pid = fork();
 	
-	if(pid == -1) return;
+	if(pid == -1) return pid;
 	else if(pid == 0){
 		
 		if(direction){
@@ -139,7 +145,7 @@ int file_desc2, bool direction, bool background){
 		
 		execv(cmd[0], cmd);
 		printf("Problem executing %s\n", cmd[0]);
-		return;
+		return -1;
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
@@ -149,6 +155,7 @@ int file_desc2, bool direction, bool background){
 		close(file_desc1);
 		close(file_desc2);
 	}
+	return pid;
 }
 
 
