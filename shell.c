@@ -124,6 +124,7 @@ int main(){
 				//run io redirection function
 				redirection(&instr, backgroundexec);
 				ioredir = 1;
+				numInstructionsRun++;
 				break;
 			}
 		}
@@ -161,6 +162,8 @@ int main(){
 			numInstructionsRun++;
 		}
 		else if (strcmp(command, "echo") == 0) {
+			instr.tokens[0] = NULL;
+			echo(instr.tokens, instr.numTokens);
 			numInstructionsRun++;
 		}
 

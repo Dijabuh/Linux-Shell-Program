@@ -260,7 +260,8 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 					//fill in when jobs is implemented
 				}
 				else if (strcmp(command, "echo") == 0) {
-					//fill in when jobs is implemented
+					cmds[i]->cmd[0] = NULL;
+					echo(cmds[i]->cmd, cmds[i]->length);
 				}
 				else {
 					execv(cmds[0]->cmd[0], cmds[0]->cmd);
@@ -301,7 +302,8 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 					//fill in when jobs is implemented
 				}
 				else if (strcmp(command, "echo") == 0) {
-					//fill in when jobs is implemented
+					cmds[i]->cmd[0] = NULL;
+					echo(cmds[i]->cmd, cmds[i]->length);
 				}
 				else {
 					execv(cmds[i]->cmd[0], cmds[i]->cmd);
@@ -349,7 +351,8 @@ int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg) {
 					//fill in when jobs is implemented
 				}
 				else if (strcmp(command, "echo") == 0) {
-					//fill in when jobs is implemented
+					cmds[i]->cmd[0] = NULL;
+					echo(cmds[i]->cmd, cmds[i]->length);
 				}
 				else {
 					execv(cmds[i]->cmd[0], cmds[i]->cmd);

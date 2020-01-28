@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
+#include <string.h>
 
 #include "builtins.h"
 #include "file_res.h"
@@ -39,4 +40,21 @@ int cd(char* path) {
 			return -1;
 		}
 	}
+}
+
+void echo(char** args, int length) {
+	for(int i = 0; i < length; i++) {
+		if(args[i] != NULL) {
+			if(args[i][0] == '$') {
+				//env var
+				char* sub = substr(args[i], 1, strlen(args[i]));
+				printf("%s ", getenv(sub));
+				free(sub);
+			}
+			else {
+				printf("%s ", args[i]);
+			}
+		}
+	}
+	printf("\n");
 }
