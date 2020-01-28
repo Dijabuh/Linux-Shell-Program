@@ -6,11 +6,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "builtins.h"
 #include "execution.h"
 #include "file_res.h"
 #include "redirection.h"
 
-int redirection(instruction* instr_ptr, bool background){
+int redirection(instruction* instr_ptr, bool background, processes* procs){
 
 	int no_bckgrnd = -1;
 	int pid;
@@ -44,7 +45,7 @@ int redirection(instruction* instr_ptr, bool background){
 	
 		cmd = get_cmd(instr_ptr);
 
-		pid = single_redirection(cmd, file_desc, (
+		pid = single_redirection(cmd, procs, file_desc, (
 			redir_case == 0 ? true : false), background);
 
 	} else if(redir_case == 2 || redir_case == 3){
@@ -77,7 +78,7 @@ int redirection(instruction* instr_ptr, bool background){
 		}
 		cmd = get_cmd(instr_ptr);
 
-		pid = double_redirection(cmd, file_desc, file_desc2, (
+		pid = double_redirection(cmd, procs, file_desc, file_desc2, (
 			redir_case == 2 ? true : false), background);
 	}
 
@@ -87,7 +88,7 @@ int redirection(instruction* instr_ptr, bool background){
 	return no_bckgrnd;
 }
 
-int single_redirection(char** cmd, int file_desc,
+int single_redirection(char** cmd, processes* procs, int file_desc,
 bool direction, bool background){
 
 	int status;
@@ -95,7 +96,7 @@ bool direction, bool background){
 
 	if(pid == -1) return pid;
 	else if(pid == 0){
-		
+	
 		if(direction)
 			close(STDIN_FILENO);
 		else
@@ -103,10 +104,24 @@ bool direction, bool background){
 
 		dup(file_desc);
 		close(file_desc);
+		
+		if(strcmp(cmd[0], "jobs") == 0){
+			jobs(procs);
+		}
+		else if(strcmp(cmd[0], "echo") == 0){
 			
-		execv(cmd[0], cmd);
-		printf("Problem executing %s\n", cmd[0]);
-		return -1;
+			int r;
+			for(r = 0; r < sizeof(cmd)/sizeof(cmd[0]); ++r){
+				if(strcmp(cmd[r], "<") || strcmp(cmd[r], ">"))
+					break;
+			}
+			printf("%d\n", r);
+			echo(cmd, r); 	
+		} else{
+			execv(cmd[0], cmd);
+			printf("Problem executing %s\n", cmd[0]);
+			return -1;
+		}
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
@@ -118,7 +133,7 @@ bool direction, bool background){
 	return pid;
 }
 
-int double_redirection(char** cmd, int file_desc1,
+int double_redirection(char** cmd, processes* procs, int file_desc1,
 int file_desc2, bool direction, bool background){
 
 	int status;
@@ -142,10 +157,21 @@ int file_desc2, bool direction, bool background){
 			dup(file_desc2);
 			close(file_desc2);
 		}
-		
-		execv(cmd[0], cmd);
-		printf("Problem executing %s\n", cmd[0]);
-		return -1;
+		if(strcmp(cmd[0], "jobs") == 0) jobs(procs);
+		else if(strcmp(cmd[0], "echo") == 0){
+			
+			// Checks to see where redirection is
+			int r;
+			for(r = 0; r < sizeof(cmd)/sizeof(cmd[0]); ++r){
+				if(strcmp(cmd[r], "<") || strcmp(cmd[r], ">"))
+					break;
+			}
+			echo(cmd, r); 	
+		} else{
+			execv(cmd[0], cmd);
+			printf("Problem executing %s\n", cmd[0]);
+			return -1;
+		}
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
@@ -273,7 +299,9 @@ char** get_cmd(instruction* instr_ptr){
 	cmd[end_cmd] = NULL;
 	
 	char* path = getPath(cmd[0]);
-	if (path != NULL){
+	if(strcmp(cmd[0], "jobs") == 0 || strcmp(cmd[0], "echo") == 0){
+		return cmd;
+	} else if(path != NULL){
 		free(cmd[0]);
 		cmd[0] = path;
 	} else

@@ -235,6 +235,7 @@ int pipeParser(instruction* instr, int bg, processes* procs) {
 
 int pipeExec(pipecmd** cmds, int length, char* filein, char* fileout, int bg, processes* procs) {
 	for(int i = 0; i < length; i++) {
+printf("%s\n", cmds[i]->cmd[0]);
 		if(i == 0) {
 			//first command
 			if(fork() == 0) {

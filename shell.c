@@ -122,11 +122,11 @@ int main(){
 		for(int i = 0; i < instr.numTokens; i++) {
 			if(strchr(instr.tokens[i], '<') != NULL || strchr(instr.tokens[i], '>') != NULL) {
 				//run io redirection function
-				int pid = redirection(&instr, backgroundexec);
+				int pid = redirection(&instr, backgroundexec, &procs);
 				ioredir = 1;
 				if(pid != -1){
-					//addNull(&instr);
-					//addProcess(&procs, pid, &instr);
+					addNull(&instr);
+					addProcess(&procs, pid, &instr);
 				}
 				numInstructionsRun++;
 				break;
