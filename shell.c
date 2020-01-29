@@ -146,11 +146,11 @@ int main(){
 			EXIT(numInstructionsRun, &procs);
 		}
 		else if (strcmp(command, "cd") == 0) {
-			if(instr.numTokens == 2) {
+			if(instr.numTokens == 3) {
 				cd(instr.tokens[1]);
 				numInstructionsRun++;
 			}
-			else if(instr.numTokens == 1) {
+			else if(instr.numTokens == 2) {
 				cd(NULL);
 				numInstructionsRun++;
 			}
