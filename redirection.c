@@ -6,15 +6,18 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "builtins.h"
 #include "execution.h"
 #include "file_res.h"
 #include "redirection.h"
 
-void redirection(instruction* instr_ptr, bool background){
+int redirection(instruction* instr_ptr, bool background, processes* procs){
 
+	int no_bckgrnd = -1;
+	int pid;
 	// Returns if failed parsing rules
 	int redir_case = parsing_rules(instr_ptr->tokens, instr_ptr->numTokens);
-	if(redir_case == -1){ return; } // violation of redirection rules
+	if(redir_case == -1){ return no_bckgrnd; } // violation of redirection rules
 
 	int file_desc;
 	int file_desc2;
@@ -37,12 +40,12 @@ void redirection(instruction* instr_ptr, bool background){
 		} else{
 			printf("Unable to open file %s\n", file);
 			free(file);
-			return;
+			return no_bckgrnd;
 		}
 	
 		cmd = get_cmd(instr_ptr);
 
-		single_redirection(cmd, file_desc, (
+		pid = single_redirection(cmd, procs, file_desc, (
 			redir_case == 0 ? true : false), background);
 
 	} else if(redir_case == 2 || redir_case == 3){
@@ -71,26 +74,29 @@ void redirection(instruction* instr_ptr, bool background){
 			printf("Unable to open file %s\n", file);
 			free(file);
 			free(file2);
-			return;
+			return no_bckgrnd;
 		}
 		cmd = get_cmd(instr_ptr);
 
-		double_redirection(cmd, file_desc, file_desc2, (
+		pid = double_redirection(cmd, procs, file_desc, file_desc2, (
 			redir_case == 2 ? true : false), background);
 	}
 
 	free(cmd);
+	if(background)
+		return pid;
+	return no_bckgrnd;
 }
 
-void single_redirection(char** cmd, int file_desc,
+int single_redirection(char** cmd, processes* procs, int file_desc,
 bool direction, bool background){
 
 	int status;
 	pid_t pid = fork();
 
-	if(pid == -1) return;
+	if(pid == -1) return pid;
 	else if(pid == 0){
-		
+	
 		if(direction)
 			close(STDIN_FILENO);
 		else
@@ -98,10 +104,26 @@ bool direction, bool background){
 
 		dup(file_desc);
 		close(file_desc);
+		
+		if(strcmp(cmd[0], "jobs") == 0){
+			jobs(procs);
+		}
+		else if(strcmp(cmd[0], "echo") == 0){
 			
-		execv(cmd[0], cmd);
-		printf("Problem executing %s\n", cmd[0]);
-		return;
+			int r;
+			for(r = 0; r < sizeof(cmd)/sizeof(cmd[0]); ++r){
+				if(strcmp(cmd[r], "<") || strcmp(cmd[r], ">"))
+					break;
+			}
+			printf("%d\n", r);
+			echo(cmd, r);
+				
+		} else{
+			execv(cmd[0], cmd);
+			printf("Problem executing %s\n", cmd[0]);
+			return -1;
+		}
+		exit(1);
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
@@ -110,15 +132,16 @@ bool direction, bool background){
 		
 		close(file_desc);
 	}
+	return pid;
 }
 
-void double_redirection(char** cmd, int file_desc1,
+int double_redirection(char** cmd, processes* procs, int file_desc1,
 int file_desc2, bool direction, bool background){
 
 	int status;
 	pid_t pid = fork();
 	
-	if(pid == -1) return;
+	if(pid == -1) return pid;
 	else if(pid == 0){
 		
 		if(direction){
@@ -136,10 +159,22 @@ int file_desc2, bool direction, bool background){
 			dup(file_desc2);
 			close(file_desc2);
 		}
-		
-		execv(cmd[0], cmd);
-		printf("Problem executing %s\n", cmd[0]);
-		return;
+		if(strcmp(cmd[0], "jobs") == 0) jobs(procs);
+		else if(strcmp(cmd[0], "echo") == 0){
+			
+			// Checks to see where redirection is
+			int r;
+			for(r = 0; r < sizeof(cmd)/sizeof(cmd[0]); ++r){
+				if(strcmp(cmd[r], "<") || strcmp(cmd[r], ">"))
+					break;
+			}
+			echo(cmd, r); 	
+		} else{
+			execv(cmd[0], cmd);
+			printf("Problem executing %s\n", cmd[0]);
+			return -1;
+		}
+		exit(1);
 	} else{
 		if(background)
 			waitpid(pid, &status, WNOHANG);
@@ -149,6 +184,7 @@ int file_desc2, bool direction, bool background){
 		close(file_desc1);
 		close(file_desc2);
 	}
+	return pid;
 }
 
 
@@ -175,23 +211,30 @@ int parsing_rules(char** cmd, int tokens){
 	int multi_redir = -1; // -1=none, 0=<, 1=>
 
 	// Checks for rule 4
-	if(strcmp(cmd[0], input) == 0 || strcmp(cmd[0], output) == 0)
+	if(strcmp(cmd[0], input) == 0 || strcmp(cmd[0], output) == 0){
+		printf("Invalid null command.\n");
 		return -1;
+	}
 
 	for(int i = 0; i < tokens; ++i){
 		
 		if(strcmp(cmd[i], input) == 0 || strcmp(cmd[i], output) == 0){
 			// Checks for rule 2
-			if(redir_counter > 1){ return -1; }
+			if(redir_counter > 1){
+				printf("Ambiguous redirect.\n");
+				return -1;
+			}
 
 			if(!alt){
 				// Checks for rule 3
 				if(multi_redir == 0){
-					if(strcmp(cmd[i], input) == 0){ 
+					if(strcmp(cmd[i], input) == 0){
+						printf("Ambiguous input redirect.\n");
 						return -1; 
 					}
 				} else if(multi_redir == 1){
 					if(strcmp(cmd[i], output) == 0){ 
+						printf("Ambiguous output redirect.\n");
 						return -1;
 					}
 				} else{
@@ -207,6 +250,7 @@ int parsing_rules(char** cmd, int tokens){
 				// Here bc cmd may have flags/args after
 				++cmd_counter;
 			} else{
+				printf("Missing name for redirect.\n");
 				return -1; // violates 5
 			}
 		} else{
@@ -216,9 +260,15 @@ int parsing_rules(char** cmd, int tokens){
 
 	// Checking if ended with command string
 	if(!alt){ ++cmd_counter; }
-	else{ return -1; } // violates 4
+	else{
+		printf("Missing name for redirect.\n");
+		return -1; 
+	} // violates 4
 
-	if(redir_counter + 1 != cmd_counter){ return -1; } // violates 1
+	if(redir_counter + 1 != cmd_counter){
+		printf("Amiguous redirect.\n");	
+		return -1; 
+	} // violates 1
 
 	if(redir_counter == 1){ return multi_redir; } // returns < or >
 	else if(redir_counter == 2){
@@ -252,7 +302,9 @@ char** get_cmd(instruction* instr_ptr){
 	cmd[end_cmd] = NULL;
 	
 	char* path = getPath(cmd[0]);
-	if (path != NULL){
+	if(strcmp(cmd[0], "jobs") == 0 || strcmp(cmd[0], "echo") == 0){
+		return cmd;
+	} else if(path != NULL){
 		free(cmd[0]);
 		cmd[0] = path;
 	} else

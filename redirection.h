@@ -1,13 +1,14 @@
 #include <stdbool.h>
 
+#include "background.h"
 #include "parser.h"
 
-void redirection(instruction* instr_ptr, bool background);
+int redirection(instruction* instr_ptr, bool background, processes* procs);
 
-void single_redirection(char** cmd, int file_desc,
+int single_redirection(char** cmd, processes* procs, int file_desc,
 	bool direction, bool background);
 
-void double_redirection(char** cmd, int file_desc1,
+int double_redirection(char** cmd, processes* procs, int file_desc1,
 	int file_desc2, bool direction, bool background);
 
 int parsing_rules(char** cmd, int tokens);
