@@ -1,18 +1,10 @@
 # Shell
-COP4610 Project 1: Implementing a Shell
+Shell program built in C. Created as project for COP4610.
 
 ## How to compile with makefile
 - Use command *"make"* to build program *"shell"*
 
 ### Contents of Tar and Files
-##### README
-- The project team members' names and division of labor
-- List who worked on each part of the project
-- The contents of your tar archive and a brief description of each file
-- How to compile your executables using your Makefile
-- Known bugs and unfinished portions of the project
-- Special considerations or anything I should know when grading your solution
-- Any completed extra credit must be documented in the README to receive credit
 ##### makefile
 - Compiles c shell program into *"shell"* by default
 - Uses *"make clean"* to remove executables and object files
@@ -64,10 +56,3 @@ COP4610 Project 1: Implementing a Shell
 - Piping commands
 - Background execution
 - Builtins
-
-### Known Bugs
-We do now know of any bugs with the shell at this time, and all parts of the project are completed
-
-### Extra Credit
-For extra credit, our program can handle multiple pipes, and io redirection, all within the same call
-Our shell can also run inside of itself
